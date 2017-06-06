@@ -27,8 +27,6 @@ class TestStage(TestCase):
             ("astro", "astro-04-00-02")
         ]
         self.stage.checkout_packages(packages)
-        print(self.working_path)
-        print(os.listdir(self.working_path))
 
 if __name__ == '__main__':
     unittest.main()
