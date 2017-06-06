@@ -1,0 +1,54 @@
+from git import Repo
+import os
+import shutil
+
+DEFAULT_REMOTE_BASE = "git@github.com:fermi-lat"
+
+"""
+The Stage Module is used for staging packages from repositories
+to a working directory.
+"""
+
+
+class Stage:
+
+    def __init__(self, working_path, remote_base=None):
+        self.working_path = working_path
+        self.remote_base = remote_base or DEFAULT_REMOTE_BASE
+
+    def checkout(self, package, ref=None, clobber=False):
+        """
+        Checkout a package repo by name.
+        :param package: Name of the package you are checking out
+        :param ref: Ref, see `git-checkout` 
+        :param clobber: Remove the directory named `repo`
+        """
+        repo_path = os.path.join(self.working_path, package)
+        # This assumes you aren't using windows
+
+        if clobber:
+            if os.path.isdir(repo_path):
+                shutil.rmtree(repo_path)
+
+        if os.path.exists(repo_path):
+            git_repo = Repo(repo_path)
+            if git_repo.working_tree_dir != repo_path:
+                raise ValueError("Not in working tree")
+        else:
+            git_repo = Repo.init(repo_path)
+            # Not clear it this does anything, but can't hurt.
+            with git_repo.config_writer() as config:
+                config.set_value("core", "sparsecheckout", "true")
+
+        if not git_repo.remotes:
+            repo_url = os.path.join(self.remote_base, package) + ".git"
+            git_repo.create_remote("origin", repo_url)
+        origin = git_repo.remotes["origin"]
+        # Not sure if this needs to be optimized
+        origin.fetch(tags=True)
+        checkout_ref = ref or git_repo.head.ref
+        git_repo.git.checkout("-f", checkout_ref)
+
+    def checkout_packages(self, packages, clobber=False):
+        for package, ref in packages:
+            self.checkout(package, ref, clobber)
