@@ -20,8 +20,8 @@ class Stage:
         """
         Checkout a package repo by name.
         :param package: Name of the package you are checking out
-        :param ref: Ref, see `git-checkout` 
-        :param clobber: Remove the directory named `repo`
+        :param ref: Tag, Branch, or Commit. See `man git-checkout` 
+        :param clobber: Remove the directory named `package` first
         """
         repo_path = os.path.join(self.working_path, package)
         # This assumes you aren't using windows
@@ -49,6 +49,13 @@ class Stage:
         checkout_ref = ref or git_repo.head.ref
         git_repo.git.checkout("-f", checkout_ref)
 
-    def checkout_packages(self, packages, clobber=False):
-        for package, ref in packages:
+    def checkout_packages(self, package_specs, clobber=False):
+        """
+        Checkout a bunch of packages
+        :param package_specs: list of (package, ref) pairs
+        :param clobber: Clobber the package directories
+        """
+        for package_spec in package_specs:
+            package = package_spec[0]
+            ref = package_spec[1] if len(package_spec) > 1 else None
             self.checkout(package, ref, clobber)
