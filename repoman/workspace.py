@@ -10,7 +10,7 @@ to a working directory.
 """
 
 
-class Stage:
+class Workspace:
 
     def __init__(self, working_path, remote_base=None):
         self.working_path = working_path

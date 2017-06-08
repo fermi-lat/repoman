@@ -1,6 +1,6 @@
 import unittest
 from unittest import TestCase
-from repoman.stage import Stage
+from repoman import Workspace
 import tempfile
 import shutil
 import os
@@ -10,7 +10,7 @@ class TestStage(TestCase):
 
     def setUp(self):
         self.working_path = tempfile.mkdtemp()
-        self.stage = Stage(self.working_path)
+        self.stage = Workspace(self.working_path)
 
     def tearDown(self):
         shutil.rmtree(self.working_path)
