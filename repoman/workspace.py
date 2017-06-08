@@ -5,7 +5,7 @@ import shutil
 DEFAULT_REMOTE_BASE = "git@github.com:fermi-lat"
 
 """
-The Stage Module is used for staging packages from repositories
+The Workspace Module is used for staging packages from repositories
 to a working directory.
 """
 
