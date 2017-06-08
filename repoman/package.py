@@ -1,6 +1,11 @@
 
 
 def read_package_list(package_path):
+    """
+    Read the list of package requirements and version
+    specifications (tags) into a list of lists.    
+    :param package_path: Path to the packageList.txt file
+    """
     package_specs = []
     with open(package_path, "r") as pfile:
         for line in pfile.readlines():
