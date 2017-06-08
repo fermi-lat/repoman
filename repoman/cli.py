@@ -2,6 +2,9 @@ import click
 import os
 import sys
 from .workspace import Workspace
+from .package import read_package_list
+
+PACKAGE_LIST = "packageList.txt"
 
 
 class RepomanCtx(object):
@@ -56,6 +59,11 @@ def stage_package(ctx, package, ref):
     see help for git-checkout"""
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
     workspace.checkout(package, ref)
+    package_dir = os.path.join(ctx.workspace_dir, package)
+    if PACKAGE_LIST in os.listdir(package_dir):
+        package_list = os.path.join(package_dir, PACKAGE_LIST)
+        package_specs = read_package_list(package_list)
+        workspace.checkout_packages(package_specs)
 
 if __name__ == '__main__':
     cli()
