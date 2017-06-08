@@ -49,11 +49,11 @@ def cli(ctx, workspace, remote_base, config):
         ctx.obj.set_config(key, value)
 
 
-@cli.command("stage-package")
+@cli.command()
 @click.argument('package')
 @click.argument('ref', required=False)
 @pass_ctx
-def stage_package(ctx, package, ref):
+def checkout(ctx, package, ref):
     """Stage a Fermi package.
     REF may be Tag, Branch, or Commit. For more information,
     see help for git-checkout"""
