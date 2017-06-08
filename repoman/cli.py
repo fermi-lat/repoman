@@ -29,6 +29,7 @@ pass_ctx = click.make_pass_decorator(RepomanCtx)
 
 @click.group()
 @click.option('--workspace', envvar='WORKSPACE_DIR', default=os.getcwd(),
+              type=click.Path(),
               metavar='PATH', help='Changes the workspace.')
 @click.option('--remote-base', envvar='REMOTE_BASE',
               default="git@github.com:fermi-lat",
@@ -52,18 +53,38 @@ def cli(ctx, workspace, remote_base, config):
 @cli.command()
 @click.argument('package')
 @click.argument('ref', required=False)
+@click.option('--latest', default=False,
+              help="Ignore versions in package list and check out master")
 @pass_ctx
-def checkout(ctx, package, ref):
+def checkout(ctx, package, ref, latest):
     """Stage a Fermi package.
     REF may be Tag, Branch, or Commit. For more information,
     see help for git-checkout"""
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
     workspace.checkout(package, ref)
     package_dir = os.path.join(ctx.workspace_dir, package)
+    # Check if this is there is a package list
     if PACKAGE_LIST in os.listdir(package_dir):
-        package_list = os.path.join(package_dir, PACKAGE_LIST)
-        package_specs = read_package_list(package_list)
+        package_list_p = os.path.join(package_dir, PACKAGE_LIST)
+        package_specs = read_package_list(package_list_p)
+        if latest:
+            package_specs = [[package] for (package, ref) in package_specs]
         workspace.checkout_packages(package_specs)
+
+
+@cli.command("checkout-list")
+@click.argument('package-list', type=click.Path())
+@click.option('--latest', default=False,
+              help="Ignore versions in package list and check out master")
+@pass_ctx
+def checkout_list(ctx, package_list, latest):
+    """Stage packages from a package list."""
+    workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
+    package_specs = read_package_list(os.path.abspath(package_list))
+    if latest:
+        package_specs = [[package] for (package, ref) in package_specs]
+    workspace.checkout_packages(package_specs)
+
 
 if __name__ == '__main__':
     cli()
