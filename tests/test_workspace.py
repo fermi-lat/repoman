@@ -10,23 +10,23 @@ class TestStage(TestCase):
 
     def setUp(self):
         self.working_path = tempfile.mkdtemp()
-        self.stage = Workspace(self.working_path)
+        self.workspace = Workspace(self.working_path)
 
     def tearDown(self):
         shutil.rmtree(self.working_path)
 
     def test_checkout(self):
-        self.stage.checkout("tip")
-        self.stage.checkout("tip")
-        self.stage.checkout("tip", ref="tags/v0")
-        self.stage.checkout("tip", ref="eb92ec2")
+        self.workspace.checkout("tip")
+        self.workspace.checkout("tip")
+        self.workspace.checkout("tip", ref="tags/v0")
+        self.workspace.checkout("tip", ref="eb92ec2")
 
     def test_checkout_packages(self):
         packages = [
             ("xmlBase", "xmlBase-05-07-01"),
             ("astro", "astro-04-00-02")
         ]
-        self.stage.checkout_packages(packages)
+        self.workspace.checkout_packages(packages)
 
 if __name__ == '__main__':
     unittest.main()

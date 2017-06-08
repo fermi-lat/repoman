@@ -10,12 +10,12 @@ class TestStage(TestCase):
 
     def setUp(self):
         self.working_path = tempfile.mkdtemp()
-        self.stage = Workspace(self.working_path)
+        self.workspace = Workspace(self.working_path)
 
     def tearDown(self):
         shutil.rmtree(self.working_path)
 
     def test_tag(self):
-        self.stage.checkout("astro")
+        self.workspace.checkout("astro")
         self.tagger = Tag(os.path.join(self.working_path, "astro"))
-        self.tagger.tag(tag, note=None, branch=None, custom=None, scons_files=None)
+        #self.tagger.tag(tag, note=None, branch=None, custom=None, scons_files=None)
