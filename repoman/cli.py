@@ -1,6 +1,7 @@
 import click
 import os
 import sys
+from .error import RepomanError
 from .workspace import Workspace
 from .package import read_package_list, read_package_list_file
 
@@ -71,7 +72,12 @@ def checkout(ctx, package, ref, force, latest):
         package_specs = read_package_list(package_list_p)
         if latest:
             package_specs = [[package] for (package, ref) in package_specs]
-        workspace.checkout_packages(package_specs)
+        try:
+            workspace.checkout_packages(package_specs)
+        except RepomanError as err:
+            _print_err(err)
+            sys.exit(1)
+
 
 
 @cli.command("checkout-list")
@@ -87,7 +93,16 @@ def checkout_list(ctx, package_list, force, latest):
     package_specs = read_package_list_file(package_list)
     if latest:
         package_specs = [[package] for (package, ref) in package_specs]
-    workspace.checkout_packages(package_specs, force=force)
+    try:
+        workspace.checkout_packages(package_specs, force=force)
+    except RepomanError as err:
+        _print_err(err)
+        sys.exit(1)
+
+
+def _print_err(err):
+    for arg in err.args:
+        click.echo(arg)
 
 
 if __name__ == '__main__':

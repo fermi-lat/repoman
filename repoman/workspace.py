@@ -1,4 +1,6 @@
 from git import Repo
+from git.exc import GitCommandError
+from .error import WorkspaceError
 import os
 import shutil
 
@@ -51,7 +53,13 @@ class Workspace:
         checkout_ref = ref or git_repo.head.ref
         checkout_args = ["-f"] if force else []
         checkout_args.append(checkout_ref)
-        git_repo.git.checkout(*checkout_args)
+        try:
+            git_repo.git.checkout(*checkout_args)
+        except GitCommandError as e:
+            raise WorkspaceError("Unable to checkout package: %s, " 
+                                 "You may need to force checkout. \n"
+                                 "Command Output: " % package,
+                                 e.stderr)
 
     def checkout_packages(self, package_specs, force=False, clobber=False):
         """
