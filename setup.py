@@ -35,6 +35,9 @@ setup(
                 'individual software packages for the Fermi Gamma-Ray Space '
                 'telescope',
     long_description=__doc__,
+    entry_points={
+        'console_scripts': ['repoman = repoman.cli:cli'],
+    },
     install_requires=[
         'gitpython',
         'click'
