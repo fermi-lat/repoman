@@ -53,7 +53,7 @@ def cli(ctx, workspace, remote_base, config):
 @cli.command()
 @click.argument('package')
 @click.argument('ref', required=False)
-@click.option('--latest', default=False,
+@click.option('--latest', is_flag=True,
               help="Ignore versions in package list and check out master")
 @pass_ctx
 def checkout(ctx, package, ref, latest):
@@ -74,7 +74,7 @@ def checkout(ctx, package, ref, latest):
 
 @cli.command("checkout-list")
 @click.argument('package-list', type=click.File("r"))
-@click.option('--latest', default=False,
+@click.option('--latest', is_flag=True,
               help="Ignore versions in package list and check out master")
 @pass_ctx
 def checkout_list(ctx, package_list, latest):
