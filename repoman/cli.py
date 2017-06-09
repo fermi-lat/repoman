@@ -53,15 +53,17 @@ def cli(ctx, workspace, remote_base, config):
 @cli.command()
 @click.argument('package')
 @click.argument('ref', required=False)
+@click.option('--force', is_flag=True,
+              help="Force git checkout. This will throw away local changes")
 @click.option('--latest', is_flag=True,
               help="Ignore versions in package list and check out master")
 @pass_ctx
-def checkout(ctx, package, ref, latest):
+def checkout(ctx, package, ref, force, latest):
     """Stage a Fermi package.
     REF may be Tag, Branch, or Commit. For more information,
     see help for git-checkout"""
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
-    workspace.checkout(package, ref)
+    workspace.checkout(package, ref, force=force)
     package_dir = os.path.join(ctx.workspace_dir, package)
     # Check if this is there is a package list
     if PACKAGE_LIST in os.listdir(package_dir):
@@ -74,16 +76,18 @@ def checkout(ctx, package, ref, latest):
 
 @cli.command("checkout-list")
 @click.argument('package-list', type=click.File("r"))
+@click.option('--force', is_flag=True,
+              help="Force git checkout. This will throw away local changes")
 @click.option('--latest', is_flag=True,
               help="Ignore versions in package list and check out master")
 @pass_ctx
-def checkout_list(ctx, package_list, latest):
+def checkout_list(ctx, package_list, force, latest):
     """Stage packages from a package list."""
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
     package_specs = read_package_list_file(package_list)
     if latest:
         package_specs = [[package] for (package, ref) in package_specs]
-    workspace.checkout_packages(package_specs)
+    workspace.checkout_packages(package_specs, force=force)
 
 
 if __name__ == '__main__':

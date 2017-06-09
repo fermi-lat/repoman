@@ -16,11 +16,13 @@ class Workspace:
         self.working_path = working_path
         self.remote_base = remote_base or DEFAULT_REMOTE_BASE
 
-    def checkout(self, package, ref=None, clobber=False):
+    def checkout(self, package, ref=None, force=False, clobber=False):
         """
         Checkout a package repo by name.
         :param package: Name of the package you are checking out
-        :param ref: Tag, Branch, or Commit. See `man git-checkout` 
+        :param ref: Tag, Branch, or Commit. See `man git-checkout`
+        :param force: Force git checkout. This throws away local
+        changes in the package.
         :param clobber: Remove the directory named `package` first
         """
         repo_path = os.path.join(self.working_path, package)
@@ -47,15 +49,19 @@ class Workspace:
         # Not sure if this needs to be optimized
         origin.fetch(tags=True)
         checkout_ref = ref or git_repo.head.ref
-        git_repo.git.checkout("-f", checkout_ref)
+        checkout_args = ["-f"] if force else []
+        checkout_args.append(checkout_ref)
+        git_repo.git.checkout(*checkout_args)
 
-    def checkout_packages(self, package_specs, clobber=False):
+    def checkout_packages(self, package_specs, force=False, clobber=False):
         """
         Checkout a bunch of packages
         :param package_specs: list of (package, ref) pairs
+        :param force: Force git checkout. This throws away local
+        changes in the packages.
         :param clobber: Clobber the package directories
         """
         for package_spec in package_specs:
             package = package_spec[0]
             ref = package_spec[1] if len(package_spec) > 1 else None
-            self.checkout(package, ref, clobber)
+            self.checkout(package, ref, force=force, clobber=clobber)

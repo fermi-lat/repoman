@@ -19,7 +19,19 @@ class TestStage(TestCase):
         self.workspace.checkout("tip")
         self.workspace.checkout("tip")
         self.workspace.checkout("tip", ref="tags/v0")
-        self.workspace.checkout("tip", ref="eb92ec2")
+        req_path = os.path.join(self.working_path, "tip/cmt/requirements")
+        with open(req_path, "w") as check_force_file:
+            check_force_file.write("some garbage")
+        try:
+            self.workspace.checkout("tip", ref="eb92ec2")
+            self.fail("Should have failed checkout")
+        except Exception as e:
+            pass
+
+        try:
+            self.workspace.checkout("tip", ref="eb92ec2", force=True)
+        except Exception as e:
+            self.fail("Should have not failed forced checkout")
 
     def test_checkout_packages(self):
         packages = [
