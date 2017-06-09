@@ -2,7 +2,7 @@ import click
 import os
 import sys
 from .workspace import Workspace
-from .package import read_package_list
+from .package import read_package_list, read_package_list_file
 
 PACKAGE_LIST = "packageList.txt"
 
@@ -73,14 +73,14 @@ def checkout(ctx, package, ref, latest):
 
 
 @cli.command("checkout-list")
-@click.argument('package-list', type=click.Path())
+@click.argument('package-list', type=click.File("r"))
 @click.option('--latest', default=False,
               help="Ignore versions in package list and check out master")
 @pass_ctx
 def checkout_list(ctx, package_list, latest):
     """Stage packages from a package list."""
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
-    package_specs = read_package_list(os.path.abspath(package_list))
+    package_specs = read_package_list_file(package_list)
     if latest:
         package_specs = [[package] for (package, ref) in package_specs]
     workspace.checkout_packages(package_specs)
