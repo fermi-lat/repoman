@@ -44,12 +44,22 @@ class Workspace:
             with git_repo.config_writer() as config:
                 config.set_value("core", "sparsecheckout", "true")
 
+        repo_url = os.path.join(self.remote_base, package) + ".git"
         if not git_repo.remotes:
-            repo_url = os.path.join(self.remote_base, package) + ".git"
             git_repo.create_remote("origin", repo_url)
         origin = git_repo.remotes["origin"]
+
         # Not sure if this needs to be optimized
-        origin.fetch(tags=True)
+        try:
+            origin.fetch(tags=True)
+        except GitCommandError as e:
+            raise WorkspaceError("Unable to fetch tags for %s. Please verify "
+                                 "package exists and you are accessing it "
+                                 "properly. You may also need to wait a few "
+                                 "minutes" % package,
+                                 "Repo: " + repo_url,
+                                 e.stderr)
+
         checkout_ref = ref or git_repo.head.ref
         checkout_args = ["-f"] if force else []
         checkout_args.append(checkout_ref)
