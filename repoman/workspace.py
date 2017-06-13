@@ -51,7 +51,8 @@ class Workspace:
 
         # Not sure if this needs to be optimized
         try:
-            origin.fetch()
+            origin.fetch(tags=True)
+            origin.fetch()  # This is required for RHEL6/git1.8 support
         except GitCommandError as e:
             raise WorkspaceError("Unable to fetch tags for %s. Please verify "
                                  "package exists and you are accessing it "

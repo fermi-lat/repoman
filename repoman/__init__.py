@@ -1,4 +1,4 @@
-__version__ = '0.1dev4'
+__version__ = '0.1dev5'
 
 from .workspace import Workspace
 from .tag import Tag
