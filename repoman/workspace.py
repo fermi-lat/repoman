@@ -51,7 +51,7 @@ class Workspace:
 
         # Not sure if this needs to be optimized
         try:
-            origin.fetch(tags=True)
+            origin.fetch()
         except GitCommandError as e:
             raise WorkspaceError("Unable to fetch tags for %s. Please verify "
                                  "package exists and you are accessing it "
