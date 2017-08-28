@@ -3,6 +3,7 @@ import os
 
 SCONS_SCRIPTS = ["SConscript", "SConstruct"]
 
+
 class Tag:
 
     def __init__(self, package_path):
@@ -15,7 +16,6 @@ class Tag:
         """CvsTag::makeTag"""
 
         package_file = self._find_package_file()
-
 
     def latest_tag(self, filename):
         pass

@@ -1,6 +1,6 @@
 import unittest
 from unittest import TestCase
-from repoman.package import read_package_list
+from repoman.package import read_package_list, PackageSpec
 import os
 import json
 
@@ -16,7 +16,10 @@ class TestPackage(TestCase):
             json_path = package_path + ".json"
             with open(json_path, "r") as json_file:
                 expected = json.loads(json_file.read())
+                expected = [PackageSpec(*spec_args) for spec_args in expected]
             actual = read_package_list(package_path)
+            print(actual)
+            print(expected)
             self.assertEqual(actual, expected, "list differs from expected")
 
 if __name__ == '__main__':

@@ -3,7 +3,8 @@ import os
 import sys
 from .error import RepomanError
 from .workspace import Workspace
-from .package import read_package_list, read_package_list_file
+from .package import PackageSpec, read_package_list, \
+    read_package_list_file
 
 PACKAGE_LIST = "packageList.txt"
 
@@ -56,10 +57,10 @@ def cli(ctx, workspace, remote_base, config):
 @click.argument('ref', required=False)
 @click.option('--force', is_flag=True,
               help="Force git checkout. This will throw away local changes")
-@click.option('--latest', is_flag=True,
+@click.option('--master', is_flag=True,
               help="Ignore versions in package list and check out master")
 @pass_ctx
-def checkout(ctx, package, ref, force, latest):
+def checkout(ctx, package, ref, force, master):
     """Stage a Fermi package.
     REF may be Tag, Branch, or Commit. For more information,
     see help for git-checkout"""
@@ -70,8 +71,9 @@ def checkout(ctx, package, ref, force, latest):
     if PACKAGE_LIST in os.listdir(package_dir):
         package_list_p = os.path.join(package_dir, PACKAGE_LIST)
         package_specs = read_package_list(package_list_p)
-        if latest:
-            package_specs = [[package] for (package, ref) in package_specs]
+        if master:
+            package_specs = [PackageSpec(package) for
+                             (package, ref, ref_path) in package_specs]
         try:
             workspace.checkout_packages(package_specs)
         except RepomanError as err:
@@ -79,19 +81,18 @@ def checkout(ctx, package, ref, force, latest):
             sys.exit(1)
 
 
-
 @cli.command("checkout-list")
 @click.argument('package-list', type=click.File("r"))
 @click.option('--force', is_flag=True,
               help="Force git checkout. This will throw away local changes")
-@click.option('--latest', is_flag=True,
+@click.option('--master', is_flag=True,
               help="Ignore versions in package list and check out master")
 @pass_ctx
-def checkout_list(ctx, package_list, force, latest):
+def checkout_list(ctx, package_list, force, master):
     """Stage packages from a package list."""
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
     package_specs = read_package_list_file(package_list)
-    if latest:
+    if master:
         package_specs = [[package] for (package, ref) in package_specs]
     try:
         workspace.checkout_packages(package_specs, force=force)

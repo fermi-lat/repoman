@@ -1,4 +1,13 @@
 
+class PackageSpec:
+    def __init__(self, package, ref=None, ref_path=None):
+        self.package = package
+        self.ref = ref
+        self.ref_path = ref_path
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
 
 def read_package_list(package_path):
     """
@@ -6,10 +15,8 @@ def read_package_list(package_path):
     specifications (tags) into a list of lists.    
     :param package_path: Path to the packageList.txt file
     """
-    package_specs = []
     with open(package_path, "r") as pfile:
-        package_specs = read_package_list_file(pfile)
-    return package_specs
+        return read_package_list_file(pfile)
 
 
 def read_package_list_file(package_file):
@@ -26,6 +33,11 @@ def read_package_list_file(package_file):
         if not len(line):
             continue
         (package, ref) = line.split(" ")
+        ref_path = None
+        if "/" in package:
+            parts = package.split("/")
+            package = parts[0]
+            ref_path = "/".join(parts[1:])
         # ref can have no whitespace
-        package_specs.append([package, ref])
+        package_specs.append(PackageSpec(package, ref, ref_path))
     return package_specs

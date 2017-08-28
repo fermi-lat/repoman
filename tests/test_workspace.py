@@ -1,6 +1,7 @@
 import unittest
 from unittest import TestCase
 from repoman import Workspace
+from repoman.package import PackageSpec
 import tempfile
 import shutil
 import os
@@ -35,8 +36,8 @@ class TestStage(TestCase):
 
     def test_checkout_packages(self):
         packages = [
-            ("xmlBase", "xmlBase-05-07-01"),
-            ("astro", "astro-04-00-02")
+            PackageSpec("xmlBase", "xmlBase-05-07-01"),
+            PackageSpec("astro", "astro-04-00-02")
         ]
         self.workspace.checkout_packages(packages)
 

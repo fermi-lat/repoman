@@ -18,11 +18,13 @@ class Workspace:
         self.working_path = working_path
         self.remote_base = remote_base or DEFAULT_REMOTE_BASE
 
-    def checkout(self, package, ref=None, force=False, clobber=False):
+    def checkout(self, package, ref=None, ref_path=None,
+                 force=False, clobber=False):
         """
         Checkout a package repo by name.
         :param package: Name of the package you are checking out
         :param ref: Tag, Branch, or Commit. See `man git-checkout`
+        :param ref_path: Specific path to checkout
         :param force: Force git checkout. This throws away local
         changes in the package.
         :param clobber: Remove the directory named `package` first
@@ -64,6 +66,8 @@ class Workspace:
         checkout_ref = ref or git_repo.head.ref
         checkout_args = ["-f"] if force else []
         checkout_args.append(checkout_ref)
+        if ref_path:
+            checkout_args.append(ref_path)
         try:
             git_repo.git.checkout(*checkout_args)
         except GitCommandError as e:
@@ -80,7 +84,6 @@ class Workspace:
         changes in the packages.
         :param clobber: Clobber the package directories
         """
-        for package_spec in package_specs:
-            package = package_spec[0]
-            ref = package_spec[1] if len(package_spec) > 1 else None
-            self.checkout(package, ref, force=force, clobber=clobber)
+        for spec in package_specs:
+            self.checkout(spec.package, spec.ref,
+                          spec.ref_path, force=force, clobber=clobber)
