@@ -30,5 +30,5 @@ class Tag:
             if os.path.exists(scons_path):
                 scons_file = scons_path
         if not scons_file:
-            raise FileNotFoundError("No SCons file found for package")
+            raise FileNotFoundError("No SCons file found for name")
         return scons_file

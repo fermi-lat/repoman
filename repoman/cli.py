@@ -3,10 +3,8 @@ import os
 import sys
 from .error import RepomanError
 from .workspace import Workspace
-from .package import PackageSpec, read_package_list, \
-    read_package_list_file
-
-PACKAGE_LIST = "packageList.txt"
+from .package import PackageSpec
+from .manifest import find_manifest, read_manifest, read_manifest_file
 
 
 class RepomanCtx(object):
@@ -41,7 +39,7 @@ pass_ctx = click.make_pass_decorator(RepomanCtx)
 @click.version_option('1.0')
 @click.pass_context
 def cli(ctx, workspace, remote_base, config):
-    """Repoman is a repo and package management tool for
+    """Repoman is a repo and name management tool for
     Fermi's Software configuration.
     """
     # Create a repo object and remember it as as the context object.  From
@@ -53,24 +51,24 @@ def cli(ctx, workspace, remote_base, config):
 
 
 @cli.command()
-@click.argument('package')
+@click.argument('name')
 @click.argument('ref', required=False)
 @click.option('--force', is_flag=True,
               help="Force git checkout. This will throw away local changes")
 @click.option('--master', is_flag=True,
-              help="Ignore versions in package list and check out master")
+              help="Ignore versions in name list and check out master")
 @pass_ctx
 def checkout(ctx, package, ref, force, master):
-    """Stage a Fermi package.
+    """Stage a Fermi name.
     REF may be Tag, Branch, or Commit. For more information,
     see help for git-checkout"""
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
     workspace.checkout(package, ref, force=force)
     package_dir = os.path.join(ctx.workspace_dir, package)
-    # Check if this is there is a package list
-    if PACKAGE_LIST in os.listdir(package_dir):
-        package_list_p = os.path.join(package_dir, PACKAGE_LIST)
-        package_specs = read_package_list(package_list_p)
+    # Check if this is there is a name list
+    manifest_path = find_manifest(package_dir)
+    if manifest_path is not None:
+        package_specs = read_manifest(manifest_path)
         if master:
             package_specs = [PackageSpec(package) for
                              (package, ref, ref_path) in package_specs]
@@ -86,12 +84,12 @@ def checkout(ctx, package, ref, force, master):
 @click.option('--force', is_flag=True,
               help="Force git checkout. This will throw away local changes")
 @click.option('--master', is_flag=True,
-              help="Ignore versions in package list and check out master")
+              help="Ignore versions in name list and check out master")
 @pass_ctx
 def checkout_list(ctx, package_list, force, master):
-    """Stage packages from a package list."""
+    """Stage packages from a name list."""
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
-    package_specs = read_package_list_file(package_list)
+    package_specs = read_manifest_file(package_list)
     if master:
         package_specs = [[package] for (package, ref) in package_specs]
     try:
