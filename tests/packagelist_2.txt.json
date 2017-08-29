@@ -1,0 +1,8 @@
+[
+  ["xmlBase", "xmlBase-05-07-01"],
+  ["astro", "astro-04-00-02"],
+  ["celestialSources", "celestialSources-01-06-01"],
+  ["celestialSources", "genericSources-01-17-01", "genericSources"],
+  ["celestialSources", "Pulsar-03-03-00", "Pulsar"],
+  ["celestialSources", "eblatten-01-01-01", "eblatten"]
+]

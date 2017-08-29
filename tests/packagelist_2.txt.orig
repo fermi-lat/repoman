@@ -1,0 +1,11 @@
+#  ScienceTools packageList.txt
+# $Id: packageList.txt,v 1.211 2017/04/28 19:24:14 jchiang Exp $
+
+# in common with GlastRelease
+xmlBase xmlBase-05-07-01
+astro astro-04-00-02
+
+# source modeling
+celestialSources celestialSources-01-06-00
+celestialSources/genericSources genericSources-01-17-00
+celestialSources/Pulsar Pulsar-03-03-00
