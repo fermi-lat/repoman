@@ -107,10 +107,8 @@ def _mangle_spec(spec):
 
 
 def format_spec(spec, comment=None):
-    spec_list = []
     package = _mangle_spec(spec)
-    spec_list.append(package)
-    spec_list.append(spec.ref)
+    spec_list = [package, spec.ref]
     if comment:
         spec_list.append(comment)
     return " ".join(spec_list)
