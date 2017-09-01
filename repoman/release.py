@@ -1,34 +1,29 @@
-from .product import Product
 
 RELEASE_COMMIT_PREFIX = "[repoman-release]"
 RELEASE_COMMIT_MESSAGE = "Prepare release"
 
 
-def resolve_next_version(package, major=None, minor=None, patch=None,
-                         pre_release=None):
+def resolve_next_version(package, major=None, minor=None, patch=None):
     current_version = package.describe_version()
     split_version = current_version.split("-")
     (next_major, next_minor, next_patch) = [int(i) for i in split_version[:3]]
     cur_more = "-".join(split_version)[3:] if len(split_version) > 3 else ""
-    next_more = None
     len_args = sum([1 for i in [major, minor, patch] if i])
 
     if not cur_more and not len_args:
         raise ValueError("Invalid version specification")
-    if cur_more and not len_args and pre_release is None:
-        raise ValueError("Invalid version specification")
 
     if major:
         next_major += 1
-    if minor:
+        next_minor = 0
+        next_patch = 0
+    elif minor:
         next_minor += 1
-    if patch:
+        next_patch = 0
+    elif patch:
         next_patch += 1
-    if pre_release:
-        next_more = pre_release
+
     version = "{:02}-{:02}-{:02}".format(next_major, next_minor, next_patch)
-    if next_more:
-        version = "-".join([version, next_more])
     return version
 
 
@@ -57,7 +52,7 @@ def prepare(package, release_version, tag_message, commit_message=None):
     # FIXME: package.repo.commit(full_commit_message)
 
     # FIXME: package.repo.tag(ref="HEAD", tag=tag)
-    if isinstance(package, Product):
+    if package.has_dependencies():
         packages = package.read_manifest()
         # assert_packages_remote(packages)
         for dependency in packages:
@@ -77,7 +72,7 @@ def perform(package, version, remote="origin"):
     tag = _get_tag(package, version)
     # FIXME: assert_tagged(package, tag)
     packages = None
-    if isinstance(package, Product):
+    if package.has_dependencies():
         packages = package.read_manifest()
     # FIXME: package.remotes[remote].push(tag)
     if packages:
@@ -113,7 +108,7 @@ def do_resolve_release(package, version):
 
 
 def tag_dependency(package, tag, tag_message):
-    package.repo.tag(ref=package.ref, message=tag_message)
+    package.repo.tag(tag, ref=package.ref, message=tag_message)
 
 
 def _push_dependency_tags(package, tag, remote=None, tag_message=None):
