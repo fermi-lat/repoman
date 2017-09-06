@@ -111,11 +111,11 @@ def checkout_list(ctx, package_list, force, master):
               help="Bump next minor version")
 @click.option('--patch', is_flag=True,
               help="Bump next patch version")
-@click.option('--push-changes/--no-push-changes', default=True,
+@click.option('--push/--no-push', default=True,
               help="Push changes")
 @pass_ctx
 def release(ctx, package, release_message, version, major, minor, patch,
-            push_changes):
+            push):
     """Prepare and perform a release.
 
     This command executes both the prepare and perform steps
@@ -127,7 +127,7 @@ def release(ctx, package, release_message, version, major, minor, patch,
             raise RepomanError("Unable to specify version with bumps.")
         version = resolve_next_version(package, major, minor, patch)
     prepare(package, version, release_message)
-    perform(package, push_changes=push_changes)
+    perform(package, push=push)
 
 
 @cli.command("release-prepare")
@@ -146,9 +146,11 @@ def release_prepare(ctx, package, release_message, version,
                     major, minor, patch):
     """Prepare for a release in git.
 
-    Steps through several phases to ensure the manifest is ready to be
-    released and then prepares local git with a tagged version of the
-    release and a record in the local copy of the parameters used.
+    Steps through several phases to ensure the repo is in a sane state
+    and the manifest (packageList.txt) is ready to be released,
+    resolving files accordingly. After this is done, a release file is
+    written and changes are staged for the next step in the release
+    process, perform.
     """
     package = _get_package(ctx, package)
     if major or minor or patch:
@@ -161,7 +163,7 @@ def release_prepare(ctx, package, release_message, version,
 
 @cli.command("release-perform")
 @click.argument('package')
-@click.option('--push-changes/--no-push-changes', default=True,
+@click.option('--push/--no-push', default=True,
               help="Push changes")
 @pass_ctx
 def release_perform(ctx, package, push_changes):
@@ -170,7 +172,7 @@ def release_perform(ctx, package, push_changes):
     Verify tags and remotes are in order and push them to the
     appropriate remotes."""
     package = _get_package(ctx, package)
-    perform(package, push_changes=push_changes)
+    perform(package, push=push_changes)
 
 
 def _get_package(ctx, name):

@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 RELEASE_COMMIT_PREFIX = "[repoman-release]"
 RELEASE_COMMIT_MESSAGE = "Prepare release"
 RELEASE_FILE = "repoman.release.json"
+TARGET_DIR = "target"
 
 
 def resolve_next_version(package, major=None, minor=None, patch=None):
@@ -39,9 +40,11 @@ def prepare(package, release_version, tag_message, commit_message=None,
     """
     Prepare for a release in git.
 
-    Steps through several phases to ensure the manifest is ready to be
-    released and then prepares local git with a tagged version of the
-    release and a record in the local copy of the parameters used.
+    Steps through several phases to ensure the repo is in a sane state
+    and the manifest (packageList.txt) is ready to be released,
+    resolving files accordingly. After this is done, a release file is
+    written and changes are staged for the next step in the release
+    process, ``perform``.
 
     :param package:
     :param release_version: Verion for the package to be released
@@ -76,21 +79,26 @@ def prepare(package, release_version, tag_message, commit_message=None,
         current_ref=current_ref
     )
 
-    release_file_path = os.path.join(package.path, RELEASE_FILE)
+    target_path = os.path.join(package.path, TARGET_DIR)
+    release_file_path = os.path.join(target_path, RELEASE_FILE)
+    if not os.path.exists(target_path):
+        os.mkdir(target_path)
     with open(release_file_path, "w") as release_file:
         output = json.dumps(release_properties)
         release_file.write(output)
 
 
-def perform(package, push_changes=True):
+def perform(package, push=True):
     """
     Verify state from perform, commit changes, tag package(s),
     and push the tags
     :param package:
-    :param push_changes: If True, release and tags will be pushed.
+    :param push: If True, tagged packages will be pushed.
     """
 
-    release_file_path = os.path.join(package.path, RELEASE_FILE)
+    target_path = os.path.join(package.path, TARGET_DIR)
+    release_file_path = os.path.join(target_path, RELEASE_FILE)
+
     if not os.path.exists(release_file_path):
         raise RepomanError("No release is currently prepared")
 
@@ -121,7 +129,7 @@ def perform(package, push_changes=True):
             dependency.repo.create_tag(tag, ref=ref, message=tag_message)
             seen_dependencies.add(dependency.name)
 
-    if push_changes:
+    if push:
         package.repo.remotes[remote].push(tag)
         if packages:
             for dependency in packages:
