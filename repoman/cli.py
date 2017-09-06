@@ -103,29 +103,38 @@ def checkout_list(ctx, package_list, force, master):
 @cli.command("release")
 @click.argument('package')
 @click.argument('release-message')
+@click.option('--version',
+              help="Custom version for release")
 @click.option('--major', is_flag=True,
               help="Bump next major version")
 @click.option('--minor', is_flag=True,
               help="Bump next minor version")
 @click.option('--patch', is_flag=True,
               help="Bump next patch version")
+@click.option('--push-changes/--no-push-changes', default=True,
+              help="Push changes")
 @pass_ctx
-def release(ctx, package, release_message, major, minor, patch):
+def release(ctx, package, release_message, version, major, minor, patch,
+            push_changes):
     """Prepare and perform a release.
 
     This command executes both the prepare and perform steps
     of a release process.
     """
     package = _get_package(ctx, package)
-    version = resolve_next_version(package, major, minor, patch)
-    # FIXME:
-    # prepare(package, version, release_message)
-    # perform(package, version)
+    if major or minor or patch:
+        if version:
+            raise RepomanError("Unable to specify version with bumps.")
+        version = resolve_next_version(package, major, minor, patch)
+    prepare(package, version, release_message)
+    perform(package, push_changes=push_changes)
 
 
 @cli.command("release-prepare")
 @click.argument('package')
 @click.argument('release-message')
+@click.option('--version',
+              help="Custom version for release")
 @click.option('--major', is_flag=True,
               help="Bump next major version")
 @click.option('--minor', is_flag=True,
@@ -133,7 +142,8 @@ def release(ctx, package, release_message, major, minor, patch):
 @click.option('--patch', is_flag=True,
               help="Bump next patch version")
 @pass_ctx
-def release_prepare(ctx, package, release_message, major, minor, patch):
+def release_prepare(ctx, package, release_message, version,
+                    major, minor, patch):
     """Prepare for a release in git.
 
     Steps through several phases to ensure the manifest is ready to be
@@ -141,27 +151,32 @@ def release_prepare(ctx, package, release_message, major, minor, patch):
     release and a record in the local copy of the parameters used.
     """
     package = _get_package(ctx, package)
-    version = resolve_next_version(package, major, minor, patch)
-    # FIXME: prepare(package, version, release_message)
+    if major or minor or patch:
+        if version:
+            raise RepomanError("Unable to specify version with bumps.")
+        version = resolve_next_version(package, major, minor, patch)
+    # FIXME: validate_version(package, version)
+    prepare(package, version, release_message)
 
 
 @cli.command("release-perform")
 @click.argument('package')
+@click.option('--push-changes/--no-push-changes', default=True,
+              help="Push changes")
 @pass_ctx
-def release_perform(ctx, package):
-    """Perform a release only.
+def release_perform(ctx, package, push_changes):
+    """Perform a release.
 
     Verify tags and remotes are in order and push them to the
     appropriate remotes."""
     package = _get_package(ctx, package)
-    version = package.describe_version()
-    # FIXME: perform(package, version)
+    perform(package, push_changes=push_changes)
 
 
 def _get_package(ctx, name):
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
     package_dir = os.path.join(ctx.workspace_dir, name)
-    package = Package(name, workspace, package_dir)
+    return Package(name, workspace, package_dir)
 
 
 def _print_err(err):

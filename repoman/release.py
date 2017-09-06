@@ -1,17 +1,24 @@
+import json
+import logging
+import os
+from .error import RepomanError
+
+logger = logging.getLogger(__name__)
 
 RELEASE_COMMIT_PREFIX = "[repoman-release]"
 RELEASE_COMMIT_MESSAGE = "Prepare release"
+RELEASE_FILE = "repoman.release.json"
 
 
 def resolve_next_version(package, major=None, minor=None, patch=None):
     current_version = package.describe_version()
     split_version = current_version.split("-")
     (next_major, next_minor, next_patch) = [int(i) for i in split_version[:3]]
-    cur_more = "-".join(split_version)[3:] if len(split_version) > 3 else ""
+    pre_release = "-".join(split_version)[3:] if len(split_version) > 3 else ""
     len_args = sum([1 for i in [major, minor, patch] if i])
 
-    if not cur_more and not len_args:
-        raise ValueError("Invalid version specification")
+    if not pre_release and not len_args:
+        raise RepomanError("Invalid version specification")
 
     if major:
         next_major += 1
@@ -27,7 +34,8 @@ def resolve_next_version(package, major=None, minor=None, patch=None):
     return version
 
 
-def prepare(package, release_version, tag_message, commit_message=None):
+def prepare(package, release_version, tag_message, commit_message=None,
+            tag_dependencies=True, remote="origin"):
     """
     Prepare for a release in git.
 
@@ -42,77 +50,97 @@ def prepare(package, release_version, tag_message, commit_message=None):
     the manifest and any other assets. If None, this defaults to
     ``{RELEASE_COMMIT_PREFIX} {RELEASE_COMMIT_MESSAGE} {tag}``, e.g.
     ``[repoman-release] Prepare release astro-01-01-01```
+    :param tag_dependencies: If True, tag the dependencies with the
+    tag as well.
+    :param remote: Remote handle of where to push changes. Defaults
+    to ``origin``.
+    """
+    # Assert everything is committed.
+    if package.repo.is_dirty():
+        raise RepomanError("Current working copy is dirty. Check git status.")
+
+    current_ref = package.repo.head.commit.hexsha
+    new_tag = _get_tag(package, release_version)
+    do_resolve_release(package, new_tag, release_version, tag_message)
+
+    full_commit_message = _get_commit_message(commit_message, new_tag)
+
+    release_properties = dict(
+        package=package.name,
+        tag=new_tag,
+        release_version=release_version,
+        tag_message=tag_message,
+        commit_message=full_commit_message,
+        tag_dependencies=tag_dependencies,
+        remote=remote,
+        current_ref=current_ref
+    )
+
+    release_file_path = os.path.join(package.path, RELEASE_FILE)
+    with open(release_file_path, "w") as release_file:
+        output = json.dumps(release_properties)
+        release_file.write(output)
+
+
+def perform(package, push_changes=True):
+    """
+    Verify state from perform, commit changes, tag package(s),
+    and push the tags
+    :param package:
+    :param push_changes: If True, release and tags will be pushed.
     """
 
-    assert_committed(package)
-    tag = _get_tag(package, release_version)
-    do_resolve_release(package, release_version)
+    release_file_path = os.path.join(package.path, RELEASE_FILE)
+    if not os.path.exists(release_file_path):
+        raise RepomanError("No release is currently prepared")
 
-    full_commit_message = _get_commit_message(commit_message, tag)
-    # FIXME: package.repo.commit(full_commit_message)
+    with open(release_file_path, "r") as release_file:
+        release_input = release_file.read()
+        release_properties = json.loads(release_input)
 
-    # FIXME: package.repo.tag(ref="HEAD", tag=tag)
-    if package.has_dependencies():
+    full_commit_message = release_properties["full_commit_message"]
+    package.repo.commit(full_commit_message)
+
+    tag = release_properties["tag"]
+    tag_message = release_properties["tag_message"]
+    remote = release_properties["remote"]
+    tag_dependencies = release_properties["tag_dependencies"]
+
+    packages = None
+    package.repo.create_tag(tag, ref="HEAD", message=tag_message)
+
+    if package.has_dependencies() and tag_dependencies:
         packages = package.read_manifest()
         # assert_packages_remote(packages)
+        seen_dependencies = set()
         for dependency in packages:
-            tag_dependency(dependency, tag, tag_message)
-    # TODO: Add support for next_version?
+            if dependency.name in seen_dependencies:
+                logger.warning("Already tagged dependency: {}. "
+                               "Skipping...".format(dependency.name))
+            ref = dependency.ref
+            dependency.repo.create_tag(tag, ref=ref, message=tag_message)
+            seen_dependencies.add(dependency.name)
+
+    if push_changes:
+        package.repo.remotes[remote].push(tag)
+        if packages:
+            for dependency in packages:
+                dependency.repo.remotes[remote].push(tag)
 
 
-def perform(package, version, remote="origin"):
-    """
-    Verify tags and remotes are in order and push them to the
-    appropriate remotes.
-    :param package:
-    :param version:
-    :param remote:
-    :return:
-    """
-    tag = _get_tag(package, version)
-    # FIXME: assert_tagged(package, tag)
-    packages = None
-    if package.has_dependencies():
-        packages = package.read_manifest()
-    # FIXME: package.remotes[remote].push(tag)
-    if packages:
-        for dependency in packages:
-            _push_dependency_tags(dependency, tag, remote=remote)
-
-
-def assert_committed(package, check_workspace=False):
-    """
-    Verify the package has no uncommitted changes.
-    :param package:
-    :param check_workspace: If true, check if workspace has any
-    uncomitted changes too.
-    """
-    # FIXME: Write this
-    pass
-
-
-def do_resolve_release(package, version):
+def do_resolve_release(package, tag, version, tag_message):
     """
     Update the manifest and any other files that might need to be
     updated as part of a release, like release notes,
     documentation, or other.
     :param package:
+    :param tag:
     :param version:
-    :return:
     """
-    tag = _get_tag(package, version)
     # FIXME: Write this
-    # update_manifest(package)
-    # release_notes(package)
+    # update_manifest(package, tag)
+    # release_notes(package, tag, tag_message)
     pass
-
-
-def tag_dependency(package, tag, tag_message):
-    package.repo.tag(tag, ref=package.ref, message=tag_message)
-
-
-def _push_dependency_tags(package, tag, remote=None, tag_message=None):
-    package.remotes[remote].push(tag)
 
 
 def _get_tag(package, version):
