@@ -1,0 +1,474 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>repoman &mdash; repoman  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="repoman  documentation" href="#"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> repoman
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">repoman</a><ul>
+<li><a class="reference internal" href="#repoman">repoman</a><ul>
+<li><a class="reference internal" href="#repoman-checkout">checkout</a></li>
+<li><a class="reference internal" href="#repoman-checkout-list">checkout-list</a></li>
+<li><a class="reference internal" href="#repoman-release">release</a></li>
+<li><a class="reference internal" href="#repoman-release-perform">release-perform</a></li>
+<li><a class="reference internal" href="#repoman-release-prepare">release-prepare</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">repoman</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>repoman</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="repoman">
+<h1>repoman<a class="headerlink" href="#repoman" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><p><em>A lot of people don&#8217;t realize what&#8217;s really going on.
+They view life as a bunch of unconnected incidents and things.
+They don&#8217;t realize that there&#8217;s this, like, lattice of
+coincidence that lays on top of everything.</em></p>
+<p>- Repo Man, 1984</p>
+</div></blockquote>
+<p>repoman is a collection of utilities for supporting development of
+software packages and their dependencies for the Fermi Gamma-Ray
+Space telescope.</p>
+<div class="section" id="repoman">
+<h2>repoman<a class="headerlink" href="#repoman" title="Permalink to this headline">¶</a></h2>
+<p>Repoman is a repo and name management tool for
+Fermi&#8217;s Software configuration.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman <span class="o">[</span>OPTIONS<span class="o">]</span> COMMAND <span class="o">[</span>ARGS<span class="o">]</span>...
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-repoman-workspace">
+<code class="descname">--workspace</code><code class="descclassname"> &lt;workspace&gt;</code><a class="headerlink" href="#cmdoption-repoman-workspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the workspace.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-remote-base">
+<code class="descname">--remote-base</code><code class="descclassname"> &lt;remote_base&gt;</code><a class="headerlink" href="#cmdoption-repoman-remote-base" title="Permalink to this definition">¶</a></dt>
+<dd><p>Github user/organization for repos</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-config">
+<code class="descname">--config</code><code class="descclassname"> &lt;config&gt;</code><a class="headerlink" href="#cmdoption-repoman-config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overrides a config key/value pair.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-version">
+<code class="descname">--version</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the version and exit.</p>
+</dd></dl>
+
+<p class="rubric">Environment variables</p>
+<dl class="envvar">
+<dt id="envvar-WORKSPACE_DIR">
+<code class="descname">WORKSPACE_DIR</code><a class="headerlink" href="#envvar-WORKSPACE_DIR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide a default for <a class="reference internal" href="#cmdoption-repoman-workspace"><code class="xref std std-option docutils literal"><span class="pre">--workspace</span></code></a></p>
+</dd></dl>
+
+<dl class="envvar">
+<dt id="envvar-REMOTE_BASE">
+<code class="descname">REMOTE_BASE</code><a class="headerlink" href="#envvar-REMOTE_BASE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide a default for <a class="reference internal" href="#cmdoption-repoman-remote-base"><code class="xref std std-option docutils literal"><span class="pre">--remote-base</span></code></a></p>
+</dd></dl>
+
+<div class="section" id="repoman-checkout">
+<h3>checkout<a class="headerlink" href="#repoman-checkout" title="Permalink to this headline">¶</a></h3>
+<p>Stage a Fermi package.
+REF may be Tag, Branch, or Commit. For more information,
+see help for git-checkout</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman checkout <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE <span class="o">[</span>REF<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-repoman-checkout-force">
+<code class="descname">--force</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-force" title="Permalink to this definition">¶</a></dt>
+<dd><p>Force git checkout. This will throw away local changes</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-checkout-master">
+<code class="descname">--master</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-master" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ignore versions in name list and check out master</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="option">
+<dt id="cmdoption-repoman-checkout-arg-package">
+<code class="descname">PACKAGE</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-arg-package" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-checkout-arg-ref">
+<code class="descname">REF</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-arg-ref" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional argument</p>
+</dd></dl>
+
+</div>
+<div class="section" id="repoman-checkout-list">
+<h3>checkout-list<a class="headerlink" href="#repoman-checkout-list" title="Permalink to this headline">¶</a></h3>
+<p>Stage packages from a package list.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman checkout-list <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE_LIST
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-repoman-checkout-list-force">
+<code class="descname">--force</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-list-force" title="Permalink to this definition">¶</a></dt>
+<dd><p>Force git checkout. This will throw away local changes</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-checkout-list-master">
+<code class="descname">--master</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-list-master" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ignore versions in name list and check out master</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="option">
+<dt id="cmdoption-repoman-checkout-list-arg-package-list">
+<code class="descname">PACKAGE_LIST</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-list-arg-package-list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</div>
+<div class="section" id="repoman-release">
+<h3>release<a class="headerlink" href="#repoman-release" title="Permalink to this headline">¶</a></h3>
+<p>Prepare and perform a release.</p>
+<p>This command executes both the prepare and perform steps
+of a release process.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman release <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE RELEASE_MESSAGE
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-repoman-release-version">
+<code class="descname">--version</code><code class="descclassname"> &lt;version&gt;</code><a class="headerlink" href="#cmdoption-repoman-release-version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom version for release</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-release-major">
+<code class="descname">--major</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-major" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bump next major version</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-release-minor">
+<code class="descname">--minor</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-minor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bump next minor version</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-release-patch">
+<code class="descname">--patch</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-patch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bump next patch version</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-release-push">
+<code class="descname">--push</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no-push</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Push changes</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="option">
+<dt id="cmdoption-repoman-release-arg-package">
+<code class="descname">PACKAGE</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-arg-package" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-release-arg-release-message">
+<code class="descname">RELEASE_MESSAGE</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-arg-release-message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</div>
+<div class="section" id="repoman-release-perform">
+<h3>release-perform<a class="headerlink" href="#repoman-release-perform" title="Permalink to this headline">¶</a></h3>
+<p>Perform a release.</p>
+<p>Verify tags and remotes are in order and push them to the
+appropriate remotes.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman release-perform <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-repoman-release-perform-push">
+<code class="descname">--push</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no-push</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-perform-push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Push changes</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="option">
+<dt id="cmdoption-repoman-release-perform-arg-package">
+<code class="descname">PACKAGE</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-perform-arg-package" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</div>
+<div class="section" id="repoman-release-prepare">
+<h3>release-prepare<a class="headerlink" href="#repoman-release-prepare" title="Permalink to this headline">¶</a></h3>
+<p>Prepare for a release in git.</p>
+<p>Steps through several phases to ensure the repo is in a sane state
+and the manifest (packageList.txt) is ready to be released,
+resolving files accordingly. After this is done, a release file is
+written and changes are staged for the next step in the release
+process, perform.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman release-prepare <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE RELEASE_MESSAGE
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-repoman-release-prepare-version">
+<code class="descname">--version</code><code class="descclassname"> &lt;version&gt;</code><a class="headerlink" href="#cmdoption-repoman-release-prepare-version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom version for release</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-release-prepare-major">
+<code class="descname">--major</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-prepare-major" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bump next major version</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-release-prepare-minor">
+<code class="descname">--minor</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-prepare-minor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bump next minor version</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-release-prepare-patch">
+<code class="descname">--patch</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-prepare-patch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bump next patch version</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="option">
+<dt id="cmdoption-repoman-release-prepare-arg-package">
+<code class="descname">PACKAGE</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-prepare-arg-package" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-repoman-release-prepare-arg-release-message">
+<code class="descname">RELEASE_MESSAGE</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-prepare-arg-release-message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Brian Van Klaveren.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
