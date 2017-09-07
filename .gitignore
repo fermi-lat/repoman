@@ -1,0 +1,8 @@
+build/
+dist/
+docs/_build
+.DS_Store
+fermi_repoman.egg-info
+*.pyc
+__pycache__
+.idea
