@@ -57,7 +57,7 @@ def cli(ctx, workspace, verbose, remote_base, config):
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
     else:
-        logging.basicConfig(level=logging.WARNING)
+        logging.basicConfig(level=logging.INFO)
 
 
 @cli.command()

@@ -3,6 +3,9 @@ from git.exc import GitCommandError
 from .error import WorkspaceError
 import os
 import shutil
+import logging
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_REMOTE_BASE = "git@github.com:fermi-lat"
 
@@ -37,6 +40,10 @@ class Workspace:
             if os.path.isdir(repo_path):
                 shutil.rmtree(repo_path)
 
+        spec_str = "{} {}".format(package, ref or "")
+        if ref_path:
+            spec_str += " for path {}".format(ref_path)
+        logging.info("Checkout out spec: {}".format(spec_str))
         repo = self.get_or_init_repo(repo_path)
         repo_url = os.path.join(self.remote_base, package) + ".git"
         if not repo.remotes:
@@ -51,10 +58,13 @@ class Workspace:
             try:
                 origin.fetch(tags=True)
                 if int(git_major) == 1 and int(git_minor) < 9:
+                    logger.debug("You are using an older version of git.")
                     origin.fetch()  # This is required for RHEL6/git1.8 support
                 break
             except GitCommandError as e:
                 if retries:
+                    logger.debug("Error checkout out {}, retrying..."
+                                 .format(package))
                     retries -= 1
                     continue
                 raise WorkspaceError("Unable to fetch tags for %s. Please verify "
