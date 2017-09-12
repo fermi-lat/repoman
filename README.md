@@ -9,3 +9,5 @@
 Repoman is a collection of utilities for managing
 individual software packages for the Fermi Gamma-Ray
 Space telescope.
+
+Documentation: https://fermi-lat.github.io/repoman/
