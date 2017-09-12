@@ -6,6 +6,9 @@ from .workspace import Workspace
 from .package import Package, PackageSpec
 from .manifest import find_manifest, read_manifest, read_manifest_file
 from .release import resolve_next_version, prepare, perform
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RepomanCtx(object):
@@ -32,6 +35,8 @@ pass_ctx = click.make_pass_decorator(RepomanCtx)
 @click.option('--workspace', envvar='WORKSPACE_DIR', default=os.getcwd(),
               type=click.Path(),
               metavar='PATH', help='Changes the workspace.')
+@click.option('--verbose', is_flag=True,
+              help='Verbose logging')
 @click.option('--remote-base', envvar='REMOTE_BASE',
               default="git@github.com:fermi-lat",
               help='Github user/organization for repos')
@@ -39,7 +44,7 @@ pass_ctx = click.make_pass_decorator(RepomanCtx)
               metavar='KEY VALUE', help='Overrides a config key/value pair.')
 @click.version_option('1.0')
 @click.pass_context
-def cli(ctx, workspace, remote_base, config):
+def cli(ctx, workspace, verbose, remote_base, config):
     """Repoman is a repo and name management tool for
     Fermi's Software configuration.
     """
@@ -49,6 +54,10 @@ def cli(ctx, workspace, remote_base, config):
     ctx.obj = RepomanCtx(os.path.abspath(workspace), remote_base)
     for key, value in config:
         ctx.obj.set_config(key, value)
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.WARNING)
 
 
 @cli.command()
@@ -71,10 +80,10 @@ def checkout(ctx, package, ref, force, master):
     if manifest_path is not None:
         package_specs = read_manifest(manifest_path)
         if master:
-            package_specs = [PackageSpec(spec.name) for
-                             spec in package_specs]
+            package_specs = [PackageSpec(spec.name, "master")
+                             for spec in package_specs]
         try:
-            workspace.checkout_packages(package_specs)
+            workspace.checkout_packages(package_specs, force=force)
         except RepomanError as err:
             _print_err(err)
             sys.exit(1)
@@ -92,7 +101,8 @@ def checkout_list(ctx, package_list, force, master):
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
     package_specs = read_manifest_file(package_list)
     if master:
-        package_specs = [PackageSpec(spec.name) for spec in package_specs]
+        package_specs = [PackageSpec(spec.name, "master")
+                         for spec in package_specs]
     try:
         workspace.checkout_packages(package_specs, force=force)
     except RepomanError as err:
