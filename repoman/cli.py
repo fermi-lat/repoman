@@ -71,8 +71,8 @@ def checkout(ctx, package, ref, force, master):
     if manifest_path is not None:
         package_specs = read_manifest(manifest_path)
         if master:
-            package_specs = [PackageSpec(package) for
-                             (package, ref, ref_path) in package_specs]
+            package_specs = [PackageSpec(spec.name) for
+                             spec in package_specs]
         try:
             workspace.checkout_packages(package_specs)
         except RepomanError as err:
@@ -92,7 +92,7 @@ def checkout_list(ctx, package_list, force, master):
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
     package_specs = read_manifest_file(package_list)
     if master:
-        package_specs = [[package] for (package, ref) in package_specs]
+        package_specs = [PackageSpec(spec.name) for spec in package_specs]
     try:
         workspace.checkout_packages(package_specs, force=force)
     except RepomanError as err:
