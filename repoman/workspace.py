@@ -42,12 +42,16 @@ class Workspace:
         if not repo.remotes:
             repo.create_remote("origin", repo_url)
         origin = repo.remotes["origin"]
+        git_version_str = repo.git.execute(["git", "--version"]).split()[2]
+        git_version_spec = git_version_str.split(".")
+        git_major, git_minor = git_version_spec[0:2]
         retries = 2
         # Not sure if this needs to be optimized
         while retries:
             try:
                 origin.fetch(tags=True)
-                origin.fetch()  # This is required for RHEL6/git1.8 support
+                if int(git_major) == 1 and int(git_minor) < 9:
+                    origin.fetch()  # This is required for RHEL6/git1.8 support
                 break
             except GitCommandError as e:
                 if retries:
