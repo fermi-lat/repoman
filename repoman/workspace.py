@@ -42,18 +42,23 @@ class Workspace:
         if not repo.remotes:
             repo.create_remote("origin", repo_url)
         origin = repo.remotes["origin"]
-
+        retries = 2
         # Not sure if this needs to be optimized
-        try:
-            origin.fetch(tags=True)
-            origin.fetch()  # This is required for RHEL6/git1.8 support
-        except GitCommandError as e:
-            raise WorkspaceError("Unable to fetch tags for %s. Please verify "
-                                 "name exists and you are accessing it "
-                                 "properly. You may also need to wait a few "
-                                 "minutes" % package,
-                                 "Repo: " + repo_url,
-                                 e.stderr)
+        while retries:
+            try:
+                origin.fetch(tags=True)
+                origin.fetch()  # This is required for RHEL6/git1.8 support
+                break
+            except GitCommandError as e:
+                if retries:
+                    retries -= 1
+                    continue
+                raise WorkspaceError("Unable to fetch tags for %s. Please verify "
+                                     "name exists and you are accessing it "
+                                     "properly. You may also need to wait a few "
+                                     "minutes" % package,
+                                     "Repo: " + repo_url,
+                                     e.stderr)
 
         checkout_ref = ref or repo.head.ref
         checkout_args = ["-f"] if force else []
