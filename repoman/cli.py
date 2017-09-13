@@ -6,6 +6,9 @@ from .workspace import Workspace
 from .package import Package, PackageSpec
 from .manifest import find_manifest, read_manifest, read_manifest_file
 from .release import resolve_next_version, prepare, perform
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RepomanCtx(object):
@@ -32,6 +35,8 @@ pass_ctx = click.make_pass_decorator(RepomanCtx)
 @click.option('--workspace', envvar='WORKSPACE_DIR', default=os.getcwd(),
               type=click.Path(),
               metavar='PATH', help='Changes the workspace.')
+@click.option('--verbose', is_flag=True,
+              help='Verbose logging')
 @click.option('--remote-base', envvar='REMOTE_BASE',
               default="git@github.com:fermi-lat",
               help='Github user/organization for repos')
@@ -39,7 +44,7 @@ pass_ctx = click.make_pass_decorator(RepomanCtx)
               metavar='KEY VALUE', help='Overrides a config key/value pair.')
 @click.version_option('1.0')
 @click.pass_context
-def cli(ctx, workspace, remote_base, config):
+def cli(ctx, workspace, verbose, remote_base, config):
     """Repoman is a repo and name management tool for
     Fermi's Software configuration.
     """
@@ -49,6 +54,10 @@ def cli(ctx, workspace, remote_base, config):
     ctx.obj = RepomanCtx(os.path.abspath(workspace), remote_base)
     for key, value in config:
         ctx.obj.set_config(key, value)
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
 
 @cli.command()
@@ -56,25 +65,32 @@ def cli(ctx, workspace, remote_base, config):
 @click.argument('ref', required=False)
 @click.option('--force', is_flag=True,
               help="Force git checkout. This will throw away local changes")
+@click.option('--in-place', is_flag=True,
+              help="Checkout package into this directory.")
 @click.option('--master', is_flag=True,
               help="Ignore versions in name list and check out master")
 @pass_ctx
-def checkout(ctx, package, ref, force, master):
+def checkout(ctx, package, ref, force, in_place, master):
     """Stage a Fermi package.
     REF may be Tag, Branch, or Commit. For more information,
-    see help for git-checkout"""
+    see help for git-checkout. By default, this will effectively
+    perform a recursive checkout if it finds a manifest
+    (packageList.txt)"""
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
-    workspace.checkout(package, ref, force=force)
-    package_dir = os.path.join(ctx.workspace_dir, package)
+    workspace.checkout(package, ref, force=force, in_place=in_place)
+
+    package_dir = ctx.workspace_dir if in_place else \
+        os.path.join(ctx.workspace_dir, package)
+
     # Check if this is there is a name list
     manifest_path = find_manifest(package_dir)
     if manifest_path is not None:
         package_specs = read_manifest(manifest_path)
         if master:
-            package_specs = [PackageSpec(package) for
-                             (package, ref, ref_path) in package_specs]
+            package_specs = [PackageSpec(spec.name, "master")
+                             for spec in package_specs]
         try:
-            workspace.checkout_packages(package_specs)
+            workspace.checkout_packages(package_specs, force=force)
         except RepomanError as err:
             _print_err(err)
             sys.exit(1)
@@ -92,7 +108,8 @@ def checkout_list(ctx, package_list, force, master):
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
     package_specs = read_manifest_file(package_list)
     if master:
-        package_specs = [[package] for (package, ref) in package_specs]
+        package_specs = [PackageSpec(spec.name, "master")
+                         for spec in package_specs]
     try:
         workspace.checkout_packages(package_specs, force=force)
     except RepomanError as err:
