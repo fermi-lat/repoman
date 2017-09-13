@@ -23,7 +23,7 @@ class Workspace:
         self.repo = None
 
     def checkout(self, package, ref=None, ref_path=None,
-                 force=False, clobber=False):
+                 force=False, clobber=False, in_place=False):
         """
         Checkout a name repo by name.
         :param package: Name of the name you are checking out
@@ -32,11 +32,14 @@ class Workspace:
         :param force: Force git checkout. This throws away local
         changes in the name.
         :param clobber: Remove the directory named `name` first
+        :param in_place: If True, use the working_path as the repo path
         """
-        repo_path = os.path.join(self.working_path, package)
+        repo_path = self.working_path
+        if not in_place:
+            repo_path = os.path.join(self.working_path, package)
         # This assumes you aren't using windows
 
-        if clobber:
+        if clobber and not in_place:
             if os.path.isdir(repo_path):
                 shutil.rmtree(repo_path)
 
@@ -49,15 +52,13 @@ class Workspace:
         if not repo.remotes:
             repo.create_remote("origin", repo_url)
         origin = repo.remotes["origin"]
-        git_version_str = repo.git.execute(["git", "--version"]).split()[2]
-        git_version_spec = git_version_str.split(".")
-        git_major, git_minor = git_version_spec[0:2]
+        git_major, git_minor = _git_version(repo)
         retries = 2
         # Not sure if this needs to be optimized
         while retries:
             try:
                 origin.fetch(tags=True)
-                if int(git_major) == 1 and int(git_minor) < 9:
+                if git_major == 1 and git_minor < 9:
                     logger.debug("You are using an older version of git.")
                     origin.fetch()  # This is required for RHEL6/git1.8 support
                 break
@@ -88,7 +89,9 @@ class Workspace:
                                  e.stderr)
 
     def get_or_init_repo(self, repo_path):
-        if os.path.exists(repo_path):
+        git_dir = os.path.join(repo_path, ".git")
+
+        if os.path.exists(git_dir):
             git_repo = Repo(repo_path)
             if git_repo.working_tree_dir != repo_path:
                 raise ValueError("Not in working tree")
@@ -110,3 +113,10 @@ class Workspace:
         for spec in package_specs:
             self.checkout(spec.name, spec.ref,
                           spec.ref_path, force=force, clobber=clobber)
+
+
+def _git_version(repo):
+    git_version_str = repo.git.execute(["git", "--version"]).split()[2]
+    git_version_spec = git_version_str.split(".")
+    git_major, git_minor = git_version_spec[0:2]
+    return int(git_major), int(git_minor)

@@ -65,16 +65,23 @@ def cli(ctx, workspace, verbose, remote_base, config):
 @click.argument('ref', required=False)
 @click.option('--force', is_flag=True,
               help="Force git checkout. This will throw away local changes")
+@click.option('--in-place', is_flag=True,
+              help="Checkout package into this directory.")
 @click.option('--master', is_flag=True,
               help="Ignore versions in name list and check out master")
 @pass_ctx
-def checkout(ctx, package, ref, force, master):
+def checkout(ctx, package, ref, force, in_place, master):
     """Stage a Fermi package.
     REF may be Tag, Branch, or Commit. For more information,
-    see help for git-checkout"""
+    see help for git-checkout. By default, this will effectively
+    perform a recursive checkout if it finds a manifest
+    (packageList.txt)"""
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
-    workspace.checkout(package, ref, force=force)
-    package_dir = os.path.join(ctx.workspace_dir, package)
+    workspace.checkout(package, ref, force=force, in_place=in_place)
+
+    package_dir = ctx.workspace_dir if in_place else \
+        os.path.join(ctx.workspace_dir, package)
+
     # Check if this is there is a name list
     manifest_path = find_manifest(package_dir)
     if manifest_path is not None:
