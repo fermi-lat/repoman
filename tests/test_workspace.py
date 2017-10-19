@@ -17,8 +17,8 @@ class TestStage(TestCase):
         shutil.rmtree(self.working_path)
 
     def test_checkout(self):
-        self.workspace.checkout("tip")
-        self.workspace.checkout("tip")
+        self.workspace.checkout("tip", "master")
+        self.workspace.checkout("tip", "master")
         self.workspace.checkout("tip", ref="tags/v0")
         req_path = os.path.join(self.working_path, "tip/cmt/requirements")
         with open(req_path, "w") as check_force_file:
