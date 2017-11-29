@@ -1,6 +1,7 @@
 import unittest
 from unittest import TestCase
-from repoman import Workspace, Tag
+from repoman.workspace import Workspace
+from repoman.tag import Tag
 import tempfile
 import shutil
 import os
