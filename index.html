@@ -86,7 +86,8 @@
             
               <!-- Local TOC -->
               <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">repoman</a><ul>
+<li><a class="reference internal" href="#">repoman</a></li>
+<li><a class="reference internal" href="#getting-started">Getting started</a><ul>
 <li><a class="reference internal" href="#repoman">repoman</a><ul>
 <li><a class="reference internal" href="#repoman-checkout">checkout</a></li>
 <li><a class="reference internal" href="#repoman-checkout-list">checkout-list</a></li>
@@ -172,6 +173,33 @@ coincidence that lays on top of everything.</em></p>
 <p>repoman is a collection of utilities for supporting development of
 software packages and their dependencies for the Fermi Gamma-Ray
 Space telescope.</p>
+</div>
+<div class="section" id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>Repoman can check out products (container packages) and their dependency
+packages. It&#8217;s oriented around the concept of a workspace &#8211; a common
+folder where the products and their packages are organized in a flat
+structure. You may have multiple workspaces or just one.</p>
+<p>While you can use repoman to interact in a few ways described below with
+your workspace, you&#8217;ll still probably want to use plain old git when
+checking in code, creating or switching branches on a single package,
+and other tasks. Where repoman can really help is coordinating the checkout
+of multiple existing branches across the repos, as well as reading the input
+of the package manifest (packageList.txt) of the container package and
+checking out the according to that specification.</p>
+<p>After you install repoman, you may check out a package. By default, repoman
+will use SSH remotes and set them up automatically for you. This may pose a
+problem if you don&#8217;t have SSH keys already set up.</p>
+<p><a class="reference external" href="https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/">Github</a>
+has a good guide on how to set that up.</p>
+<p>If you&#8217;d rather use the <code class="docutils literal"><span class="pre">https</span></code> protocol, you&#8217;ll want to use a different <code class="docutils literal"><span class="pre">--remote-base</span></code>
+parameter for the fermi-lat organization, e.g. <code class="docutils literal"><span class="pre">--remote-base</span> <span class="pre">https://github.com/fermi-lat</span></code>,
+or set the <code class="docutils literal"><span class="pre">REMOTE_BASE</span></code> environment veriable so you don&#8217;t need it every time.</p>
+<p>By default, when using repoman to check out, it will fail if there are changes
+in your working copy. That way it doesn&#8217;t accidentally blow out work you&#8217;ve maybe done
+developing and haven&#8217;t committed. You are encouraged to fix this yourself by either
+stashing your changes or resetting your repository, but if you&#8217;d like to just force
+repoman to check out changes for you, use the <code class="docutils literal"><span class="pre">--force</span></code> option.</p>
 <div class="section" id="repoman">
 <h2>repoman<a class="headerlink" href="#repoman" title="Permalink to this headline">¶</a></h2>
 <p>Repoman is a repo and name management tool for
@@ -226,9 +254,11 @@ Fermi&#8217;s Software configuration.</p>
 <div class="section" id="repoman-checkout">
 <h3>checkout<a class="headerlink" href="#repoman-checkout" title="Permalink to this headline">¶</a></h3>
 <p>Stage a Fermi package.
-REF may be Tag, Branch, or Commit. For more information,
-see help for git-checkout</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman checkout <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE <span class="o">[</span>REF<span class="o">]</span>
+REFS may be Tags, Branches, or Commits. For more information,
+see help for git-checkout. By default, this will effectively
+perform a recursive checkout if it finds a manifest
+(packageList.txt), checking out</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman checkout <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE <span class="o">[</span>REFS<span class="o">]</span>...
 </pre></div>
 </div>
 <p class="rubric">Options</p>
@@ -245,9 +275,9 @@ see help for git-checkout</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-repoman-checkout-master">
-<code class="descname">--master</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-master" title="Permalink to this definition">¶</a></dt>
-<dd><p>Ignore versions in name list and check out master</p>
+<dt id="cmdoption-repoman-checkout-develop">
+<code class="descname">--develop</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-develop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ignore tags in name list and check out development branches</p>
 </dd></dl>
 
 <p class="rubric">Arguments</p>
@@ -258,9 +288,9 @@ see help for git-checkout</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-repoman-checkout-arg-ref">
-<code class="descname">REF</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-arg-ref" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optional argument</p>
+<dt id="cmdoption-repoman-checkout-arg-refs">
+<code class="descname">REFS</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-arg-refs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional argument(s)</p>
 </dd></dl>
 
 </div>
@@ -278,9 +308,9 @@ see help for git-checkout</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-repoman-checkout-list-master">
-<code class="descname">--master</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-list-master" title="Permalink to this definition">¶</a></dt>
-<dd><p>Ignore versions in name list and check out master</p>
+<dt id="cmdoption-repoman-checkout-list-develop">
+<code class="descname">--develop</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-list-develop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ignore tags in name list and check out development branches</p>
 </dd></dl>
 
 <p class="rubric">Arguments</p>
