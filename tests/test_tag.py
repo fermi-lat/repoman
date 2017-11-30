@@ -1,6 +1,7 @@
 import unittest
 from unittest import TestCase
-from repoman import Workspace, Tag
+from repoman.workspace import Workspace
+from repoman.tag import Tag
 import tempfile
 import shutil
 import os
@@ -16,6 +17,6 @@ class TestStage(TestCase):
         shutil.rmtree(self.working_path)
 
     def test_tag(self):
-        self.workspace.checkout("astro")
+        self.workspace.checkout("astro", "master")
         self.tagger = Tag(os.path.join(self.working_path, "astro"))
         #self.tagger.tag(tag, note=None, branch=None, custom=None, scons_files=None)

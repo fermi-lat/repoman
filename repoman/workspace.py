@@ -22,13 +22,15 @@ class Workspace:
         self.remote_base = remote_base or DEFAULT_REMOTE_BASE
         self.repo = None
 
-    def checkout(self, package, ref=None, ref_path=None,
+    def checkout(self, package, ref=None, ref_path=None, refs=None,
                  force=False, clobber=False, in_place=False):
         """
         Checkout a name repo by name.
         :param package: Name of the name you are checking out
         :param ref: Tag, Branch, or Commit. See `man git-checkout`
         :param ref_path: Specific path to checkout
+        :param refs: List of Tags, Branches, or Commits, in decreasing
+        priority, to check out. Master is implicit at the end.
         :param force: Force git checkout. This throws away local
         changes in the name.
         :param clobber: Remove the directory named `name` first
@@ -43,10 +45,6 @@ class Workspace:
             if os.path.isdir(repo_path):
                 shutil.rmtree(repo_path)
 
-        spec_str = "{} {}".format(package, ref or "")
-        if ref_path:
-            spec_str += " for path {}".format(ref_path)
-        logging.info("Checkout out spec: {}".format(spec_str))
         repo = self.get_or_init_repo(repo_path)
         repo_url = os.path.join(self.remote_base, package) + ".git"
         if not repo.remotes:
@@ -76,6 +74,21 @@ class Workspace:
                                      e.stderr)
 
         checkout_ref = ref or repo.head.ref
+
+        # If a ref is listed in the list, use that instead
+        if refs:
+            repo_refs = repo.references
+            origin_refs = repo.remotes.origin.refs
+            for ref in refs:
+                if ref in repo_refs or ref in origin_refs:
+                    checkout_ref = ref
+                    break
+
+        spec_str = "{} {}".format(package, checkout_ref or "")
+        if ref_path:
+            spec_str += " for path {}".format(ref_path)
+        logging.info("Checkout out spec: {}".format(spec_str))
+
         checkout_args = ["-f"] if force else []
         checkout_args.append(checkout_ref)
         if ref_path:
@@ -102,17 +115,20 @@ class Workspace:
                 config.set_value("core", "sparsecheckout", "true")
         return git_repo
 
-    def checkout_packages(self, package_specs, force=False, clobber=False):
+    def checkout_packages(self, package_specs, refs=None, force=False,
+                          clobber=False):
         """
         Checkout a bunch of packages
         :param package_specs: list of (name, ref) pairs
+        :param refs: Prioritized list of refs to checkout, with leftmost
+        priority).
         :param force: Force git checkout. This throws away local
         changes in the packages.
         :param clobber: Clobber the name directories
         """
         for spec in package_specs:
-            self.checkout(spec.name, spec.ref,
-                          spec.ref_path, force=force, clobber=clobber)
+            self.checkout(spec.name, spec.ref, spec.ref_path,
+                          refs=refs, force=force, clobber=clobber)
 
 
 def _git_version(repo):

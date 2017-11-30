@@ -62,35 +62,35 @@ def cli(ctx, workspace, verbose, remote_base, config):
 
 @cli.command()
 @click.argument('package')
-@click.argument('ref', required=False)
+@click.argument('refs', nargs=-1, required=False)
 @click.option('--force', is_flag=True,
               help="Force git checkout. This will throw away local changes")
 @click.option('--in-place', is_flag=True,
               help="Checkout package into this directory.")
-@click.option('--master', is_flag=True,
-              help="Ignore versions in name list and check out master")
+@click.option('--develop', is_flag=True,
+              help="Ignore tags in name list and check out development branches")
 @pass_ctx
-def checkout(ctx, package, ref, force, in_place, master):
+def checkout(ctx, package, refs, force, in_place, develop):
     """Stage a Fermi package.
-    REF may be Tag, Branch, or Commit. For more information,
+    REFS may be Tags, Branches, or Commits. For more information,
     see help for git-checkout. By default, this will effectively
     perform a recursive checkout if it finds a manifest
-    (packageList.txt)"""
+    (packageList.txt), checking out """
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
-    workspace.checkout(package, ref, force=force, in_place=in_place)
+    workspace.checkout(package, _dev_branch(package), force=force,
+                       refs=refs, in_place=in_place)
 
     package_dir = ctx.workspace_dir if in_place else \
         os.path.join(ctx.workspace_dir, package)
-
     # Check if this is there is a name list
     manifest_path = find_manifest(package_dir)
     if manifest_path is not None:
         package_specs = read_manifest(manifest_path)
-        if master:
-            package_specs = [PackageSpec(spec.name, "master")
+        if develop:
+            package_specs = [PackageSpec(spec.name, _dev_branch(spec.name))
                              for spec in package_specs]
         try:
-            workspace.checkout_packages(package_specs, force=force)
+            workspace.checkout_packages(package_specs, refs=refs, force=force)
         except RepomanError as err:
             _print_err(err)
             sys.exit(1)
@@ -100,15 +100,15 @@ def checkout(ctx, package, ref, force, in_place, master):
 @click.argument('package-list', type=click.File("r"))
 @click.option('--force', is_flag=True,
               help="Force git checkout. This will throw away local changes")
-@click.option('--master', is_flag=True,
-              help="Ignore versions in name list and check out master")
+@click.option('--develop', is_flag=True,
+              help="Ignore tags in name list and check out development branches")
 @pass_ctx
-def checkout_list(ctx, package_list, force, master):
+def checkout_list(ctx, package_list, force, develop):
     """Stage packages from a package list."""
     workspace = Workspace(ctx.workspace_dir, ctx.remote_base)
     package_specs = read_manifest_file(package_list)
-    if master:
-        package_specs = [PackageSpec(spec.name, "master")
+    if develop:
+        package_specs = [PackageSpec(spec.name, _dev_branch(spec.name))
                          for spec in package_specs]
     try:
         workspace.checkout_packages(package_specs, force=force)
@@ -190,6 +190,10 @@ def release_perform(ctx, package, push_changes):
     appropriate remotes."""
     package = _get_package(ctx, package)
     perform(package, push=push_changes)
+
+
+def _dev_branch(package):
+    return "master"
 
 
 def _get_package(ctx, name):
