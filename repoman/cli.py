@@ -6,6 +6,7 @@ from .workspace import Workspace
 from .package import Package, PackageSpec
 from .manifest import find_manifest, read_manifest, read_manifest_file
 from .release import resolve_next_version, prepare, perform
+from . import __version__
 import logging
 
 logger = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ pass_ctx = click.make_pass_decorator(RepomanCtx)
               help='Github user/organization for repos')
 @click.option('--config', nargs=2, multiple=True,
               metavar='KEY VALUE', help='Overrides a config key/value pair.')
-@click.version_option('1.0')
+@click.version_option(__version__)
 @click.pass_context
 def cli(ctx, workspace, verbose, remote_base, config):
     """Repoman is a repo and name management tool for
