@@ -80,6 +80,9 @@ class Workspace:
             repo_refs = repo.references
             origin_refs = repo.remotes.origin.refs
             for ref in refs:
+                if _has_commit(repo, ref):
+                    checkout_ref = ref
+                    break
                 if ref in repo_refs or ref in origin_refs:
                     checkout_ref = ref
                     break
@@ -136,3 +139,11 @@ def _git_version(repo):
     git_version_spec = git_version_str.split(".")
     git_major, git_minor = git_version_spec[0:2]
     return int(git_major), int(git_minor)
+
+
+def _has_commit(repo, ref):
+    try:
+        repo.git.show("--oneline", ref)
+        return True
+    except GitCommandError as e:
+        return False
