@@ -8,6 +8,7 @@ from .manifest import find_manifest, read_manifest, read_manifest_file
 from .release import resolve_next_version, prepare, perform
 from . import __version__
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -70,8 +71,10 @@ def cli(ctx, workspace, verbose, remote_base, config):
               help="Checkout package into this directory.")
 @click.option('--develop', is_flag=True,
               help="Ignore tags in name list and check out development branches")
+@click.option('--manifest', is_flag=True,
+              help="Provide a JSON manifest of the commit SHA's checked out")
 @pass_ctx
-def checkout(ctx, package, refs, force, in_place, develop):
+def checkout(ctx, package, refs, force, in_place, develop, manifest):
     """Stage a Fermi package.
     REFS may be Tags, Branches, or Commits. For more information,
     see help for git-checkout. By default, this will effectively
@@ -95,6 +98,10 @@ def checkout(ctx, package, refs, force, in_place, develop):
         except RepomanError as err:
             _print_err(err)
             sys.exit(1)
+    if manifest:
+        with open('repoman_manifest.json', 'w') as f:
+            json.dump(workspace.shaManifest, f, sort_keys=True,
+                indent=4, separators=(',', ': '))
 
 
 @cli.command("checkout-list")
