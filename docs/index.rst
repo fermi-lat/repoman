@@ -28,6 +28,8 @@ of multiple existing branches across the repos, as well as reading the input
 of the package manifest (packageList.txt) of the container package and
 checking out the according to that specification.
 
+Install repoman with ``pip install fermi-repoman``
+
 After you install repoman, you may check out a package. By default, repoman
 will use SSH remotes and set them up automatically for you. This may pose a
 problem if you don't have SSH keys already set up.
