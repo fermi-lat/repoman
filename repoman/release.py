@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 RELEASE_COMMIT_PREFIX = "[repoman-release]"
 RELEASE_COMMIT_MESSAGE = "Prepare release"
-RELEASE_FILE = "repoman.release.json"
+RELEASE_FILE = "repoman_release.json"
 TARGET_DIR = "target"
 
 
