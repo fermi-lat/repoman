@@ -1,3 +1,4 @@
+import git
 from git import Repo
 from git.exc import GitCommandError
 from .error import WorkspaceError
@@ -5,6 +6,7 @@ import os
 import shutil
 import logging
 from collections import OrderedDict
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +18,9 @@ to a working directory.
 """
 
 
+SLEEP_INTERVALS = [0.5, 2.5, 5]
+
+
 class Workspace:
 
     def __init__(self, working_path, remote_base=None):
@@ -23,6 +28,8 @@ class Workspace:
         self.remote_base = remote_base or DEFAULT_REMOTE_BASE
         self.repo = None
         self.bom = OrderedDict()
+        self.git_version = _git_version()
+        self.fetched = []
 
     def checkout(self, package, ref=None, ref_path=None, refs=None,
                  force=False, clobber=False, in_place=False):
@@ -51,29 +58,11 @@ class Workspace:
         repo_url = os.path.join(self.remote_base, package) + ".git"
         if not repo.remotes:
             repo.create_remote("origin", repo_url)
-        origin = repo.remotes["origin"]
-        git_major, git_minor = _git_version(repo)
-        retries = 2
-        # Not sure if this needs to be optimized
-        while retries:
-            try:
-                origin.fetch(tags=True)
-                if git_major == 1 and git_minor < 9:
-                    logger.debug("You are using an older version of git.")
-                    origin.fetch()  # This is required for RHEL6/git1.8 support
-                break
-            except GitCommandError as e:
-                if retries:
-                    logger.debug("Error checkout out {}, retrying..."
-                                 .format(package))
-                    retries -= 1
-                    continue
-                raise WorkspaceError("Unable to fetch tags for %s. Please verify "
-                                     "name exists and you are accessing it "
-                                     "properly. You may also need to wait a few "
-                                     "minutes" % package,
-                                     "Repo: " + repo_url,
-                                     e.stderr)
+
+        # Check if package has already been fetched.
+        # This happens if we are checking out a path at a different ref
+        if package not in self.fetched:
+            self._fetch(package, repo, repo_url)
 
         checkout_ref = ref or repo.head.ref
 
@@ -100,8 +89,7 @@ class Workspace:
             checkout_args.append(ref_path)
         try:
             repo.git.checkout(*checkout_args)
-            self.bom[package] = dict(commit = repo.git.get_object_header(
-                    checkout_ref)[0])
+            self.bom[package] = dict(commit=repo.head.commit.hexsha)
         except GitCommandError as e:
             raise WorkspaceError("Unable to checkout name: %s, "
                                  "You may need to force checkout. \n"
@@ -137,9 +125,36 @@ class Workspace:
             self.checkout(spec.name, spec.ref, spec.ref_path,
                           refs=refs, force=force, clobber=clobber)
 
+    def _fetch(self, package, repo, repo_url):
+        remote = repo.remotes["origin"]
+        git_major, git_minor = self.git_version
+        retry = 0
+        # Not sure if this needs to be optimized
+        while True:
+            try:
+                remote.fetch(tags=True)
+                if git_major == 1 and git_minor < 9:
+                    logger.debug("You are using an older version of git.")
+                    remote.fetch()  # This is required for RHEL6/git1.8 support
+                self.fetched.append(package)
+                break
+            except GitCommandError as e:
+                if retry < len(SLEEP_INTERVALS):
+                    logger.debug("Error checkout out {}, retrying in {}s"
+                                 .format(package, SLEEP_INTERVALS[retry]))
+                    time.sleep(SLEEP_INTERVALS[retry])
+                    retry += 1
+                    continue
+                raise WorkspaceError("Unable to fetch tags for %s. Please verify "
+                                     "name exists and you are accessing it "
+                                     "properly. You may also need to wait a few "
+                                     "minutes" % package,
+                                     "Repo: " + repo_url,
+                                     e.stderr)
 
-def _git_version(repo):
-    git_version_str = repo.git.execute(["git", "--version"]).split()[2]
+
+def _git_version():
+    git_version_str = git.cmd.Git().version().split()[2]
     git_version_spec = git_version_str.split(".")
     git_major, git_minor = git_version_spec[0:2]
     return int(git_major), int(git_minor)
