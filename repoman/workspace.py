@@ -106,9 +106,7 @@ class Workspace:
             checkout_args.append(ref_path)
         try:
             repo.git.checkout(*checkout_args)
-            self.bom[package] = dict(
-                commit=repo.git.get_object_header(checkout_ref)[0]
-            )
+            self.bom[package] = dict(commit=repo.head.commit.hexsha)
         except GitCommandError as e:
             raise WorkspaceError("Unable to checkout name: %s, "
                                  "You may need to force checkout. \n"
