@@ -281,6 +281,12 @@ perform a recursive checkout if it finds a manifest
 <dd><p>Ignore tags in name list and check out development branches</p>
 </dd></dl>
 
+<dl class="option">
+<dt id="cmdoption-repoman-checkout-bom">
+<code class="descname">--bom</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-bom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide a JSON bill of materials of the commit SHA&#8217;s checked out</p>
+</dd></dl>
+
 <p class="rubric">Arguments</p>
 <dl class="option">
 <dt id="cmdoption-repoman-checkout-arg-package">
@@ -406,7 +412,10 @@ and the manifest (packageList.txt) is ready to be released,
 resolving files accordingly. After this is done, a release file is
 written and changes are staged for the next step in the release
 process, perform.</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman release-prepare <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE RELEASE_MESSAGE
+<p>If a CHANGELOG.md file is found, the release message will be
+prepended to it. For information on how to format the message,
+please see <a class="reference external" href="http://keepachangelog.com/en/1.0.0">http://keepachangelog.com/en/1.0.0</a>.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman release-prepare <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE <span class="o">[</span>RELEASE_MESSAGE<span class="o">]</span>
 </pre></div>
 </div>
 <p class="rubric">Options</p>
@@ -444,7 +453,7 @@ process, perform.</p>
 <dl class="option">
 <dt id="cmdoption-repoman-release-prepare-arg-release-message">
 <code class="descname">RELEASE_MESSAGE</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-release-prepare-arg-release-message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Required argument</p>
+<dd><p>Optional argument</p>
 </dd></dl>
 
 </div>
