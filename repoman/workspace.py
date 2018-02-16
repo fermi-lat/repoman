@@ -5,6 +5,7 @@ import os
 import shutil
 import logging
 from collections import OrderedDict
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,9 @@ DEFAULT_REMOTE_BASE = "git@github.com:fermi-lat"
 The Workspace Module is used for staging packages from repositories
 to a working directory.
 """
+
+RETRIES = 3
+SLEEP_INTERVALS = [0.5, 2.5, 5]
 
 
 class Workspace:
@@ -53,9 +57,9 @@ class Workspace:
             repo.create_remote("origin", repo_url)
         origin = repo.remotes["origin"]
         git_major, git_minor = _git_version(repo)
-        retries = 2
+        retry = 0
         # Not sure if this needs to be optimized
-        while retries:
+        while retry < RETRIES:
             try:
                 origin.fetch(tags=True)
                 if git_major == 1 and git_minor < 9:
@@ -63,10 +67,11 @@ class Workspace:
                     origin.fetch()  # This is required for RHEL6/git1.8 support
                 break
             except GitCommandError as e:
-                if retries:
-                    logger.debug("Error checkout out {}, retrying..."
-                                 .format(package))
-                    retries -= 1
+                if retry < RETRIES:
+                    logger.debug("Error checkout out {}, retrying... in {}"
+                                 .format(package, SLEEP_INTERVALS[retry]))
+                    time.sleep(SLEEP_INTERVALS[retry])
+                    retry += 1
                     continue
                 raise WorkspaceError("Unable to fetch tags for %s. Please verify "
                                      "name exists and you are accessing it "
