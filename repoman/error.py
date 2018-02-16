@@ -4,4 +4,3 @@ class RepomanError(Exception):
 
 class WorkspaceError(RepomanError):
     pass
-

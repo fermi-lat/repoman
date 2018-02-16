@@ -1,6 +1,8 @@
 import click
 import os
 import sys
+import git
+from datetime import datetime
 from .error import RepomanError
 from .workspace import Workspace
 from .package import Package, PackageSpec
@@ -10,6 +12,8 @@ from . import __version__
 import logging
 
 logger = logging.getLogger(__name__)
+
+RELEASE_TEMPLATE = "## [{version}] - {date} @[username]\n### Added\n- "
 
 
 class RepomanCtx(object):
@@ -144,13 +148,15 @@ def release(ctx, package, release_message, version, major, minor, patch,
         if version:
             raise RepomanError("Unable to specify version with bumps.")
         version = resolve_next_version(package, major, minor, patch)
+    if not release_message:
+        release_message = _release_message(version)
     prepare(package, version, release_message)
     perform(package, push=push)
 
 
 @cli.command("release-prepare")
 @click.argument('package')
-@click.argument('release-message')
+@click.argument('release-message', required=False)
 @click.option('--version',
               help="Custom version for release")
 @click.option('--major', is_flag=True,
@@ -169,6 +175,10 @@ def release_prepare(ctx, package, release_message, version,
     resolving files accordingly. After this is done, a release file is
     written and changes are staged for the next step in the release
     process, perform.
+
+    If a CHANGELOG.md file is found, the release message will be
+    prepended to it. For information on how to format the message,
+    please see http://keepachangelog.com/en/1.0.0.
     """
     package = _get_package(ctx, package)
     if major or minor or patch:
@@ -176,6 +186,8 @@ def release_prepare(ctx, package, release_message, version,
             raise RepomanError("Unable to specify version with bumps.")
         version = resolve_next_version(package, major, minor, patch)
     # FIXME: validate_version(package, version)
+    if not release_message:
+        release_message = _release_message(version)
     prepare(package, version, release_message)
 
 
@@ -184,13 +196,13 @@ def release_prepare(ctx, package, release_message, version,
 @click.option('--push/--no-push', default=True,
               help="Push changes")
 @pass_ctx
-def release_perform(ctx, package, push_changes):
+def release_perform(ctx, package, push):
     """Perform a release.
 
     Verify tags and remotes are in order and push them to the
     appropriate remotes."""
     package = _get_package(ctx, package)
-    perform(package, push=push_changes)
+    perform(package, push=push)
 
 
 def _dev_branch(package):
@@ -206,6 +218,29 @@ def _get_package(ctx, name):
 def _print_err(err):
     for arg in err.args:
         click.echo(arg)
+
+
+def _global_info():
+    info = dict(editor=None, name=None, email=None)
+    globalconfig = git.GitConfigParser([
+        os.path.normpath(os.path.expanduser("~/.gitconfig"))],
+        read_only=True)
+    if globalconfig.has_option("core", "editor"):
+        info['editor'] = globalconfig.get_value("core", "editor")
+    if globalconfig.has_option("user", "name"):
+        info['name'] = globalconfig.get_value("user", "name")
+    if globalconfig.has_option("user", "email"):
+        info['email'] = globalconfig.get_value("user", "email")
+    return info
+
+
+def _release_message(version):
+    global_info = _global_info()
+    template = RELEASE_TEMPLATE.format(
+        version=version, date=datetime.utcnow().strftime("%Y-%m-%d")
+    )
+    return click.edit(template, editor=global_info['editor'],
+                      extension=".md")
 
 
 if __name__ == '__main__':
