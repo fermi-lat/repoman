@@ -130,7 +130,7 @@ def checkout_list(ctx, package_list, force, develop):
 
 @cli.command("release")
 @click.argument('package')
-@click.argument('release-message')
+@click.argument('release-message', required=False)
 @click.option('--version',
               help="Custom version for release")
 @click.option('--major', is_flag=True,
