@@ -1,5 +1,10 @@
-from git import Repo
+from git import Repo, GitCommandError
 from .error import RepomanError
+import logging
+
+logger = logging.getLogger(__name__)
+
+DESCRIBE_MATCH_PATTERN = "{name}-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]*"
 
 
 class Package:
@@ -31,15 +36,26 @@ class Package:
         """
         Describe this package the most recent package tag.
         """
-        # FIXME: Write this
-        pass
+        return self.repo.git.describe(
+            "--dirty",
+            "--match", DESCRIBE_MATCH_PATTERN.format(name=self.name),
+            "--tags",
+            "--always"
+        )
 
-    def describe_version(self):
+    def closest_tag(self):
         """
-        Describe the version string based on the most recent tag.
+        Describe this package the most recent package tag.
         """
-        # FIXME: Write this
-        pass
+        try:
+            return self.repo.git.describe(
+                "--match", DESCRIBE_MATCH_PATTERN.format(name=self.name),
+                "--tags",
+                "--abbrev=0"
+            )
+        except GitCommandError as e:
+            logger.warning(e)
+        return None
 
 
 class PackageSpec:
