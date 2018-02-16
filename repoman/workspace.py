@@ -4,6 +4,7 @@ from .error import WorkspaceError
 import os
 import shutil
 import logging
+from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ class Workspace:
         self.working_path = working_path
         self.remote_base = remote_base or DEFAULT_REMOTE_BASE
         self.repo = None
+        self.bom = OrderedDict()
 
     def checkout(self, package, ref=None, ref_path=None, refs=None,
                  force=False, clobber=False, in_place=False):
@@ -95,8 +97,10 @@ class Workspace:
             checkout_args.append(ref_path)
         try:
             repo.git.checkout(*checkout_args)
+            self.bom[package] = dict(commit = repo.git.get_object_header(
+                    checkout_ref)[0])
         except GitCommandError as e:
-            raise WorkspaceError("Unable to checkout name: %s, " 
+            raise WorkspaceError("Unable to checkout name: %s, "
                                  "You may need to force checkout. \n"
                                  "Command Output: " % package,
                                  e.stderr)
