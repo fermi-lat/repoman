@@ -71,7 +71,7 @@ class Workspace:
                 self.fetched.append(package)
                 break
             except GitCommandError as e:
-                if retry < RETRIES:
+                if retry < RETRIES + 1:
                     logger.debug("Error checkout out {}, retrying in {}s"
                                  .format(package, SLEEP_INTERVALS[retry]))
                     time.sleep(SLEEP_INTERVALS[retry])
