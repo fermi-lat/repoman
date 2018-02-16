@@ -17,7 +17,7 @@ The Workspace Module is used for staging packages from repositories
 to a working directory.
 """
 
-RETRIES = 3
+
 SLEEP_INTERVALS = [0.5, 2.5, 5]
 
 
@@ -58,31 +58,11 @@ class Workspace:
         repo_url = os.path.join(self.remote_base, package) + ".git"
         if not repo.remotes:
             repo.create_remote("origin", repo_url)
-        origin = repo.remotes["origin"]
-        git_major, git_minor = self.git_version
-        retry = 0
-        # Not sure if this needs to be optimized
-        while package not in self.fetched and retry < RETRIES:
-            try:
-                origin.fetch(tags=True)
-                if git_major == 1 and git_minor < 9:
-                    logger.debug("You are using an older version of git.")
-                    origin.fetch()  # This is required for RHEL6/git1.8 support
-                self.fetched.append(package)
-                break
-            except GitCommandError as e:
-                if retry < RETRIES + 1:
-                    logger.debug("Error checkout out {}, retrying in {}s"
-                                 .format(package, SLEEP_INTERVALS[retry]))
-                    time.sleep(SLEEP_INTERVALS[retry])
-                    retry += 1
-                    continue
-                raise WorkspaceError("Unable to fetch tags for %s. Please verify "
-                                     "name exists and you are accessing it "
-                                     "properly. You may also need to wait a few "
-                                     "minutes" % package,
-                                     "Repo: " + repo_url,
-                                     e.stderr)
+
+        # Check if package has already been fetched.
+        # This happens if we are checking out a path at a different ref
+        if package not in self.fetched:
+            self._fetch(package, repo, repo_url)
 
         checkout_ref = ref or repo.head.ref
 
@@ -141,6 +121,33 @@ class Workspace:
         for spec in package_specs:
             self.checkout(spec.name, spec.ref, spec.ref_path,
                           refs=refs, force=force, clobber=clobber)
+
+    def _fetch(self, package, repo, repo_url):
+        remote = repo.remotes["origin"]
+        git_major, git_minor = self.git_version
+        retry = 0
+        # Not sure if this needs to be optimized
+        while True:
+            try:
+                remote.fetch(tags=True)
+                if git_major == 1 and git_minor < 9:
+                    logger.debug("You are using an older version of git.")
+                    remote.fetch()  # This is required for RHEL6/git1.8 support
+                self.fetched.append(package)
+                break
+            except GitCommandError as e:
+                if retry < len(SLEEP_INTERVALS):
+                    logger.debug("Error checkout out {}, retrying in {}s"
+                                 .format(package, SLEEP_INTERVALS[retry]))
+                    time.sleep(SLEEP_INTERVALS[retry])
+                    retry += 1
+                    continue
+                raise WorkspaceError("Unable to fetch tags for %s. Please verify "
+                                     "name exists and you are accessing it "
+                                     "properly. You may also need to wait a few "
+                                     "minutes" % package,
+                                     "Repo: " + repo_url,
+                                     e.stderr)
 
 
 def _git_version():
