@@ -47,6 +47,7 @@ class Package:
         """
         Describe this package the most recent package tag.
         """
+        self.repo.commit()
         try:
             return self.repo.git.describe(
                 "--match", DESCRIBE_MATCH_PATTERN.format(name=self.name),
