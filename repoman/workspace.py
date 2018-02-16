@@ -1,3 +1,4 @@
+import git
 from git import Repo
 from git.exc import GitCommandError
 from .error import WorkspaceError
@@ -27,6 +28,8 @@ class Workspace:
         self.remote_base = remote_base or DEFAULT_REMOTE_BASE
         self.repo = None
         self.bom = OrderedDict()
+        self.git_version = _git_version()
+        self.fetched = []
 
     def checkout(self, package, ref=None, ref_path=None, refs=None,
                  force=False, clobber=False, in_place=False):
@@ -56,19 +59,20 @@ class Workspace:
         if not repo.remotes:
             repo.create_remote("origin", repo_url)
         origin = repo.remotes["origin"]
-        git_major, git_minor = _git_version(repo)
+        git_major, git_minor = self.git_version
         retry = 0
         # Not sure if this needs to be optimized
-        while retry < RETRIES:
+        while package not in self.fetched and retry < RETRIES:
             try:
                 origin.fetch(tags=True)
                 if git_major == 1 and git_minor < 9:
                     logger.debug("You are using an older version of git.")
                     origin.fetch()  # This is required for RHEL6/git1.8 support
+                self.fetched.append(package)
                 break
             except GitCommandError as e:
                 if retry < RETRIES:
-                    logger.debug("Error checkout out {}, retrying... in {}"
+                    logger.debug("Error checkout out {}, retrying in {}s"
                                  .format(package, SLEEP_INTERVALS[retry]))
                     time.sleep(SLEEP_INTERVALS[retry])
                     retry += 1
@@ -102,8 +106,9 @@ class Workspace:
             checkout_args.append(ref_path)
         try:
             repo.git.checkout(*checkout_args)
-            self.bom[package] = dict(commit = repo.git.get_object_header(
-                    checkout_ref)[0])
+            self.bom[package] = dict(
+                commit=repo.git.get_object_header(checkout_ref)[0]
+            )
         except GitCommandError as e:
             raise WorkspaceError("Unable to checkout name: %s, "
                                  "You may need to force checkout. \n"
@@ -140,8 +145,8 @@ class Workspace:
                           refs=refs, force=force, clobber=clobber)
 
 
-def _git_version(repo):
-    git_version_str = repo.git.execute(["git", "--version"]).split()[2]
+def _git_version():
+    git_version_str = git.cmd.Git().version().split()[2]
     git_version_spec = git_version_str.split(".")
     git_major, git_minor = git_version_spec[0:2]
     return int(git_major), int(git_minor)
