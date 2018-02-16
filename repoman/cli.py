@@ -222,8 +222,9 @@ def _print_err(err):
 
 def _global_info():
     info = dict(editor=None, name=None, email=None)
-    globalconfig = git.GitConfigParser([os.path.normpath(os.path.expanduser("~/.gitconfig"))],
-                                       read_only=True)
+    globalconfig = git.GitConfigParser([
+        os.path.normpath(os.path.expanduser("~/.gitconfig"))],
+        read_only=True)
     if globalconfig.has_option("core", "editor"):
         info['editor'] = globalconfig.get_value("core", "editor")
     if globalconfig.has_option("user", "name"):
