@@ -39,7 +39,7 @@ def resolve_next_version(package, major=None, minor=None, patch=None):
 
 
 def prepare(package, release_version, release_message, commit_message=None,
-            tag_dependencies=True, remote="origin"):
+            remote="origin"):
     """
     Prepare for a release in git.
 
@@ -57,8 +57,6 @@ def prepare(package, release_version, release_message, commit_message=None,
     the manifest and any other assets. If None, this defaults to
     ``{RELEASE_COMMIT_PREFIX} {RELEASE_COMMIT_MESSAGE} {tag}``, e.g.
     ``[repoman-release] Prepare release astro-01-01-01```
-    :param tag_dependencies: If True, tag the dependencies with the
-    tag as well.
     :param remote: Remote handle of where to push changes. Defaults
     to ``origin``.
     """
@@ -77,7 +75,6 @@ def prepare(package, release_version, release_message, commit_message=None,
         release_version=release_version,
         release_message=release_message,
         commit_message=full_commit_message,
-        # tag_dependencies=tag_dependencies,
         remote=remote,
         current_ref=current_ref
     )
@@ -96,8 +93,8 @@ def perform(package, push=True):
     """
     Verify state from perform, commit changes, tag package(s),
     and push the tags
-    :param package:
-    :param push: If True, tagged packages will be pushed.
+    :param package: Package to release
+    :param push: If True, the tag will be pushed.
     """
 
     target_path = os.path.join(package.path, TARGET_DIR)
@@ -125,28 +122,11 @@ def perform(package, push=True):
     tag = release_properties["tag"]
     release_message = release_properties["release_message"]
     remote = release_properties["remote"]
-    # tag_dependencies = release_properties["tag_dependencies"]
-
-    packages = None
-    package.repo.create_tag(tag, ref="HEAD", message=release_message)
-
-    # if package.has_dependencies() and tag_dependencies:
-    #     packages = package.read_manifest()
-    #     # assert_packages_remote(packages)
-    #     seen_dependencies = set()
-    #     for dependency in packages:
-    #         if dependency.name in seen_dependencies:
-    #             logger.warning("Already tagged dependency: {}. "
-    #                            "Skipping...".format(dependency.name))
-    #         ref = dependency.ref
-    #         dependency.repo.create_tag(tag, ref=ref, message=release_message)
-    #         seen_dependencies.add(dependency.name)
+    package.repo.create_tag(tag, ref="HEAD", message=release_message,
+                            cleanup="whitespace")
 
     if push:
         package.repo.remotes[remote].push(tag)
-        if packages:
-            for dependency in packages:
-                dependency.repo.remotes[remote].push(tag)
 
 
 def do_resolve_release(package, release_properties):
