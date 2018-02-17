@@ -90,6 +90,10 @@ class Workspace:
         try:
             repo.git.checkout(*checkout_args)
             self.bom[package] = dict(commit=repo.head.commit.hexsha)
+            if checkout_ref in repo.tags:
+                self.bom[package]["tag"] = checkout_ref
+            if not repo.head.is_detached:
+                self.bom[package]["branch"] = repo.head.ref.name
         except GitCommandError as e:
             raise WorkspaceError("Unable to checkout name: %s, "
                                  "You may need to force checkout. \n"
