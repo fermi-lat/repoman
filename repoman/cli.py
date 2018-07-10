@@ -1,5 +1,6 @@
 import click
 import os
+import subprocess
 import sys
 import git
 from datetime import datetime
@@ -57,6 +58,15 @@ def cli(ctx, workspace, verbose, remote_base, config):
     # Create a repo object and remember it as as the context object.  From
     # this point onwards other commands can refer to it by using the
     # @pass_repo decorator.
+    
+    # But first, lets see if ssh will work to a github remote_base
+    if "git@github" in remote_base:
+        FNULL = open(os.devnull, 'w')
+        if subprocess.call(["ssh","git@github.com"], stderr=FNULL, stdout=FNULL) != 1:
+            remote_base = "https://github.com/fermi-lat"
+            click.echo("Default SSH remote does not work, falling back to:"
+                       + remote_base)
+        FNULL.close()
     ctx.obj = RepomanCtx(os.path.abspath(workspace), remote_base)
     for key, value in config:
         ctx.obj.set_config(key, value)
