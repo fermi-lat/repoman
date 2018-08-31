@@ -78,12 +78,12 @@ class Workspace:
 
                 # Prefer origin refs
                 if ref in origin_refs:
-                    checkout_ref = origin_refs.get(ref)
+                    checkout_ref = origin_refs[ref]
                     break
 
                 # fall back to local refs if not at origin
                 if ref in repo_refs:
-                    checkout_ref = repo_refs.get(ref)
+                    checkout_ref = repo_refs[ref]
                     break
 
         spec_str = "{} {}".format(package, checkout_ref or "")
