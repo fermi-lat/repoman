@@ -22,6 +22,11 @@ with open('repoman/__init__.py', 'rb') as f:
     version = str(ast.literal_eval(_version_re.search(
         f.read().decode('utf-8')).group(1)))
 
+doc_requires = [
+    "sphinx",
+    "sphinx_click",
+    "sphinx_rtd_theme"
+]
 
 setup(
     name='fermi-repoman',
