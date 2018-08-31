@@ -24,25 +24,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="repoman  documentation" href="#"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -109,7 +101,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="#">repoman</a>
@@ -117,9 +109,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -164,9 +157,9 @@
   <div class="section" id="repoman">
 <h1>repoman<a class="headerlink" href="#repoman" title="Permalink to this headline">¶</a></h1>
 <blockquote>
-<div><p><em>A lot of people don&#8217;t realize what&#8217;s really going on.
+<div><p><em>A lot of people don’t realize what’s really going on.
 They view life as a bunch of unconnected incidents and things.
-They don&#8217;t realize that there&#8217;s this, like, lattice of
+They don’t realize that there’s this, like, lattice of
 coincidence that lays on top of everything.</em></p>
 <p>- Repo Man, 1984</p>
 </div></blockquote>
@@ -177,35 +170,35 @@ Space telescope.</p>
 <div class="section" id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <p>Repoman can check out products (container packages) and their dependency
-packages. It&#8217;s oriented around the concept of a workspace &#8211; a common
+packages. It’s oriented around the concept of a workspace – a common
 folder where the products and their packages are organized in a flat
 structure. You may have multiple workspaces or just one.</p>
 <p>While you can use repoman to interact in a few ways described below with
-your workspace, you&#8217;ll still probably want to use plain old git when
+your workspace, you’ll still probably want to use plain old git when
 checking in code, creating or switching branches on a single package,
 and other tasks. Where repoman can really help is coordinating the checkout
 of multiple existing branches across the repos, as well as reading the input
 of the package manifest (packageList.txt) of the container package and
 checking out the according to that specification.</p>
-<p>Install repoman with <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">fermi-repoman</span></code></p>
+<p>Install repoman with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">fermi-repoman</span></code></p>
 <p>After you install repoman, you may check out a package. By default, repoman
 will use SSH remotes and set them up automatically for you. This may pose a
-problem if you don&#8217;t have SSH keys already set up.</p>
+problem if you don’t have SSH keys already set up.</p>
 <p><a class="reference external" href="https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/">Github</a>
 has a good guide on how to set that up.</p>
-<p>If you&#8217;d rather use the <code class="docutils literal"><span class="pre">https</span></code> protocol, you&#8217;ll want to use a different <code class="docutils literal"><span class="pre">--remote-base</span></code>
-parameter for the fermi-lat organization, e.g. <code class="docutils literal"><span class="pre">--remote-base</span> <span class="pre">https://github.com/fermi-lat</span></code>,
-or set the <code class="docutils literal"><span class="pre">REMOTE_BASE</span></code> environment veriable so you don&#8217;t need it every time.</p>
+<p>If you’d rather use the <code class="docutils literal notranslate"><span class="pre">https</span></code> protocol, you’ll want to use a different <code class="docutils literal notranslate"><span class="pre">--remote-base</span></code>
+parameter for the fermi-lat organization, e.g. <code class="docutils literal notranslate"><span class="pre">--remote-base</span> <span class="pre">https://github.com/fermi-lat</span></code>,
+or set the <code class="docutils literal notranslate"><span class="pre">REMOTE_BASE</span></code> environment veriable so you don’t need it every time.</p>
 <p>By default, when using repoman to check out, it will fail if there are changes
-in your working copy. That way it doesn&#8217;t accidentally blow out work you&#8217;ve maybe done
-developing and haven&#8217;t committed. You are encouraged to fix this yourself by either
-stashing your changes or resetting your repository, but if you&#8217;d like to just force
-repoman to check out changes for you, use the <code class="docutils literal"><span class="pre">--force</span></code> option.</p>
+in your working copy. That way it doesn’t accidentally blow out work you’ve maybe done
+developing and haven’t committed. You are encouraged to fix this yourself by either
+stashing your changes or resetting your repository, but if you’d like to just force
+repoman to check out changes for you, use the <code class="docutils literal notranslate"><span class="pre">--force</span></code> option.</p>
 <div class="section" id="repoman">
 <h2>repoman<a class="headerlink" href="#repoman" title="Permalink to this headline">¶</a></h2>
 <p>Repoman is a repo and name management tool for
-Fermi&#8217;s Software configuration.</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman <span class="o">[</span>OPTIONS<span class="o">]</span> COMMAND <span class="o">[</span>ARGS<span class="o">]</span>...
+Fermi’s Software configuration.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>repoman <span class="o">[</span>OPTIONS<span class="o">]</span> COMMAND <span class="o">[</span>ARGS<span class="o">]</span>...
 </pre></div>
 </div>
 <p class="rubric">Options</p>
@@ -243,13 +236,13 @@ Fermi&#8217;s Software configuration.</p>
 <dl class="envvar">
 <dt id="envvar-WORKSPACE_DIR">
 <code class="descname">WORKSPACE_DIR</code><a class="headerlink" href="#envvar-WORKSPACE_DIR" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provide a default for <a class="reference internal" href="#cmdoption-repoman-workspace"><code class="xref std std-option docutils literal"><span class="pre">--workspace</span></code></a></p>
+<dd><p>Provide a default for <a class="reference internal" href="#cmdoption-repoman-workspace"><code class="xref std std-option docutils literal notranslate"><span class="pre">--workspace</span></code></a></p>
 </dd></dl>
 
 <dl class="envvar">
 <dt id="envvar-REMOTE_BASE">
 <code class="descname">REMOTE_BASE</code><a class="headerlink" href="#envvar-REMOTE_BASE" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provide a default for <a class="reference internal" href="#cmdoption-repoman-remote-base"><code class="xref std std-option docutils literal"><span class="pre">--remote-base</span></code></a></p>
+<dd><p>Provide a default for <a class="reference internal" href="#cmdoption-repoman-remote-base"><code class="xref std std-option docutils literal notranslate"><span class="pre">--remote-base</span></code></a></p>
 </dd></dl>
 
 <div class="section" id="repoman-checkout">
@@ -259,14 +252,14 @@ REFS may be Tags, Branches, or Commits. For more information,
 see help for git-checkout. By default, this will effectively
 perform a recursive checkout if it finds a manifest
 (packageList.txt), checking out</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman checkout <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE <span class="o">[</span>REFS<span class="o">]</span>...
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>repoman checkout <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE <span class="o">[</span>REFS<span class="o">]</span>...
 </pre></div>
 </div>
 <p class="rubric">Options</p>
 <dl class="option">
 <dt id="cmdoption-repoman-checkout-force">
 <code class="descname">--force</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-force" title="Permalink to this definition">¶</a></dt>
-<dd><p>Force git checkout. This will throw away local changes</p>
+<dd><p>Force git checkout. This will throw away local changes in your branch, as well as reset to the reference at origin,if found</p>
 </dd></dl>
 
 <dl class="option">
@@ -284,7 +277,7 @@ perform a recursive checkout if it finds a manifest
 <dl class="option">
 <dt id="cmdoption-repoman-checkout-bom">
 <code class="descname">--bom</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-bom" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provide a JSON bill of materials of the commit SHA&#8217;s checked out</p>
+<dd><p>Provide a JSON bill of materials of the commit SHA’s checked out</p>
 </dd></dl>
 
 <p class="rubric">Arguments</p>
@@ -304,14 +297,14 @@ perform a recursive checkout if it finds a manifest
 <div class="section" id="repoman-checkout-list">
 <h3>checkout-list<a class="headerlink" href="#repoman-checkout-list" title="Permalink to this headline">¶</a></h3>
 <p>Stage packages from a package list.</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman checkout-list <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE_LIST
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>repoman checkout-list <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE_LIST
 </pre></div>
 </div>
 <p class="rubric">Options</p>
 <dl class="option">
 <dt id="cmdoption-repoman-checkout-list-force">
 <code class="descname">--force</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-repoman-checkout-list-force" title="Permalink to this definition">¶</a></dt>
-<dd><p>Force git checkout. This will throw away local changes</p>
+<dd><p>Force git checkout. This will throw away local changes in your branch, as well as reset to the reference at origin,if found</p>
 </dd></dl>
 
 <dl class="option">
@@ -333,7 +326,7 @@ perform a recursive checkout if it finds a manifest
 <p>Prepare and perform a release.</p>
 <p>This command executes both the prepare and perform steps
 of a release process.</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman release <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE <span class="o">[</span>RELEASE_MESSAGE<span class="o">]</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>repoman release <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE <span class="o">[</span>RELEASE_MESSAGE<span class="o">]</span>
 </pre></div>
 </div>
 <p class="rubric">Options</p>
@@ -386,7 +379,7 @@ of a release process.</p>
 <p>Perform a release.</p>
 <p>Verify tags and remotes are in order and push them to the
 appropriate remotes.</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman release-perform <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>repoman release-perform <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE
 </pre></div>
 </div>
 <p class="rubric">Options</p>
@@ -415,7 +408,7 @@ process, perform.</p>
 <p>If a CHANGELOG.md file is found, the release message will be
 prepended to it. For information on how to format the message,
 please see <a class="reference external" href="http://keepachangelog.com/en/1.0.0">http://keepachangelog.com/en/1.0.0</a>.</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>repoman release-prepare <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE <span class="o">[</span>RELEASE_MESSAGE<span class="o">]</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>repoman release-prepare <span class="o">[</span>OPTIONS<span class="o">]</span> PACKAGE <span class="o">[</span>RELEASE_MESSAGE<span class="o">]</span>
 </pre></div>
 </div>
 <p class="rubric">Options</p>
@@ -462,9 +455,7 @@ please see <a class="reference external" href="http://keepachangelog.com/en/1.0.
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -477,7 +468,7 @@ please see <a class="reference external" href="http://keepachangelog.com/en/1.0.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -496,6 +487,7 @@ please see <a class="reference external" href="http://keepachangelog.com/en/1.0.
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
             VERSION:'',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -508,19 +500,13 @@ please see <a class="reference external" href="http://keepachangelog.com/en/1.0.
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>
