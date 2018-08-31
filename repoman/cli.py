@@ -61,10 +61,11 @@ def cli(ctx, workspace, verbose, remote_base, config):
     
     # But first, lets see if ssh will work to a github remote_base
     if "git@github" in remote_base:
+        org_or_user = remote_base.split(":")[-1]
         devnull = open(os.devnull, 'w')
         if subprocess.call(["ssh", "git@github.com"], stderr=devnull, stdout=devnull) != 1:
-            remote_base = "https://github.com/fermi-lat"
-            click.echo("Default SSH remote does not work, falling back to:" + remote_base)
+            remote_base = "https://github.com/" + org_or_user
+            click.echo("Default SSH remote does not work, falling back to: " + remote_base)
         devnull.close()
     ctx.obj = RepomanCtx(os.path.abspath(workspace), remote_base)
     for key, value in config:
