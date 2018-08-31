@@ -61,12 +61,11 @@ def cli(ctx, workspace, verbose, remote_base, config):
     
     # But first, lets see if ssh will work to a github remote_base
     if "git@github" in remote_base:
-        FNULL = open(os.devnull, 'w')
-        if subprocess.call(["ssh","git@github.com"], stderr=FNULL, stdout=FNULL) != 1:
+        devnull = open(os.devnull, 'w')
+        if subprocess.call(["ssh", "git@github.com"], stderr=devnull, stdout=devnull) != 1:
             remote_base = "https://github.com/fermi-lat"
-            click.echo("Default SSH remote does not work, falling back to:"
-                       + remote_base)
-        FNULL.close()
+            click.echo("Default SSH remote does not work, falling back to:" + remote_base)
+        devnull.close()
     ctx.obj = RepomanCtx(os.path.abspath(workspace), remote_base)
     for key, value in config:
         ctx.obj.set_config(key, value)
@@ -80,7 +79,9 @@ def cli(ctx, workspace, verbose, remote_base, config):
 @click.argument('package')
 @click.argument('refs', nargs=-1, required=False)
 @click.option('--force', is_flag=True,
-              help="Force git checkout. This will throw away local changes")
+              help="Force git checkout. This will throw away local changes in "
+                   "your branch, as well as reset to the reference at origin,"
+                   "if found")
 @click.option('--in-place', is_flag=True,
               help="Checkout package into this directory.")
 @click.option('--develop', is_flag=True,
@@ -120,7 +121,9 @@ def checkout(ctx, package, refs, force, in_place, develop, bom):
 @cli.command("checkout-list")
 @click.argument('package-list', type=click.File("r"))
 @click.option('--force', is_flag=True,
-              help="Force git checkout. This will throw away local changes")
+              help="Force git checkout. This will throw away local changes in "
+                   "your branch, as well as reset to the reference at origin,"
+                   "if found")
 @click.option('--develop', is_flag=True,
               help="Ignore tags in name list and check out development branches")
 @pass_ctx

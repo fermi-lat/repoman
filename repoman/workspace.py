@@ -41,7 +41,8 @@ class Workspace:
         :param refs: List of Tags, Branches, or Commits, in decreasing
         priority, to check out. Master is implicit at the end.
         :param force: Force git checkout. This throws away local
-        changes in the name.
+        changes in the name. This also implies forcing to checkout
+        what's in origin.
         :param clobber: Remove the directory named `name` first
         :param in_place: If True, use the working_path as the repo path
         """
@@ -74,8 +75,15 @@ class Workspace:
                 if _has_commit(repo, ref):
                     checkout_ref = ref
                     break
-                if ref in repo_refs or ref in origin_refs:
-                    checkout_ref = ref
+
+                # Prefer origin refs
+                if ref in origin_refs:
+                    checkout_ref = origin_refs.get(ref)
+                    break
+
+                # fall back to local refs if not at origin
+                if ref in repo_refs:
+                    checkout_ref = repo_refs.get(ref)
                     break
 
         spec_str = "{} {}".format(package, checkout_ref or "")
@@ -89,6 +97,8 @@ class Workspace:
             checkout_args.append(ref_path)
         try:
             repo.git.checkout(*checkout_args)
+            if force:
+                repo.git.reset("--hard", checkout_ref)
             self.bom[package] = dict(commit=repo.head.commit.hexsha)
             if checkout_ref in repo.tags:
                 self.bom[package]["tag"] = checkout_ref
