@@ -44,7 +44,7 @@ setup(
         'console_scripts': ['repoman = repoman.cli:cli'],
     },
     install_requires=[
-        'gitpython',
+        'gitpython<3',
         'click'
     ],
     classifiers=[
